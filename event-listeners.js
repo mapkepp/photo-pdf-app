@@ -49,7 +49,7 @@ document.getElementById('photo-upload').addEventListener('change', function(e) {
 });
 
 // Обработчик генерации PDF
-document.getElementById('generate-pdf').addEventListener('click', function() {
+document.getElementById('generate-pdf').addEventListener('click', async function() {
     if (!checkJsPDFReady()) {
         alert('Библиотека jsPDF ещё загружается. Подождите несколько секунд.');
         return;
@@ -59,7 +59,16 @@ document.getElementById('generate-pdf').addEventListener('click', function() {
         titleInput: document.getElementById('title'),
         downloadLink: document.getElementById('download-link')
     };
-    generatePdf(elements);
+
+    // Показываем индикатор загрузки
+    const status = document.getElementById('pdf-status');
+    status.textContent = 'Создание PDF...';
+    status.style.color = 'blue';
+
+    await generatePdf(elements);
+
+    // Возвращаем статус
+    updateGeneratePdfButton();
 });
 
 // Периодическая проверка готовности jsPDF (каждые 200 мс)
