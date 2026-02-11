@@ -34,6 +34,17 @@
             margin: 2px;
             padding: 5px 10px;
         }
+        /* Добавляем индикатор загрузки */
+        #loading-status {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            padding: 10px;
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 5px;
+            z-index: 1000;
+        }
     </style>
 </head>
 <body>
@@ -45,6 +56,9 @@
     <input type="text" id="title" placeholder="Заголовок PDF" value="Мои фотографии">
     <button id="generate-pdf">Создать PDF</button>
     <a id="download-link" class="hidden" download="photos.pdf">Скачать PDF</a>
+
+    <!-- Индикатор загрузки -->
+    <div id="loading-status">Загрузка библиотек...</div>
 
     <!-- Подключаем jsPDF -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -58,5 +72,20 @@
     <script type="module" src="pdf-photo-renderer.js"></script>
     <script type="module" src="pdf-generator.js"></script>
     <script type="module" src="event-listeners.js"></script>
+
+    <script>
+        // Отслеживаем загрузку jsPDF
+        window.addEventListener('load', function() {
+            setTimeout(() => {
+                const status = document.getElementById('loading-status');
+                if (window.jspdf) {
+                    status.textContent = 'Готово к работе!';
+            } else {
+                status.textContent = 'Ошибка: jsPDF не загружен';
+                status.style.background = '#ffdddd';
+            }
+            }, 500);
+        });
+    </script>
 </body>
 </html>
