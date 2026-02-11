@@ -38,47 +38,40 @@ export function renderPhotos() {
 
     window.photos
         .sort((a, b) => a.order - b.order)
-        .forEach((photo, index) => {
+        .forEach(photo => {
             const photoDiv = document.createElement('div');
             photoDiv.className = 'photo-item';
 
-            // Создаём img с обработкой ошибок
             const img = document.createElement('img');
             img.src = photo.src;
-            img.alt = 'Фото';
-            img.onerror = () => {
-                img.style.display = 'none';
-                console.error(`Ошибка загрузки изображения: ${photo.src}`);
-            };
+            img.alt = 'Загруженное фото';
 
-            const textarea = document.createElement('textarea');
-            textarea.placeholder = 'Комментарий к фото';
-            textarea.dataset.id = photo.id;
-            textarea.value = photo.comment || '';
-            textarea.addEventListener('input', function() {
-                const photoId = this.dataset.id;
-                const comment = this.value;
-                const targetPhoto = window.photos.find(p => p.id == photoId);
-                if (targetPhoto) {
-                    targetPhoto.comment = comment;
-            localStorage.setItem('photos', JSON.stringify(window.photos));
-        }
-    });
+            const commentTextarea = document.createElement('textarea');
+            commentTextarea.placeholder = 'Комментарий к фото';
+            commentTextarea.value = photo.comment || '';
+            commentTextarea.addEventListener('input', () => {
+                photo.comment = commentTextarea.value;
+                localStorage.setItem('photos', JSON.stringify(window.photos));
+            });
 
-    const controls = document.createElement('div');
-    controls.className = 'controls';
-    controls.innerHTML = `
-        <button onclick="movePhoto(${photo.id}, -1)">←</button>
-        <span>Позиция: ${index + 1}</span>
-        <button onclick="movePhoto(${photo.id}, 1)">→</button>
-        <button onclick="removePhoto(${photo.id})">Удалить</button>
-    `;
+            const controls = document.createElement('div');
+            controls.className = 'controls';
 
-    photoDiv.appendChild(img);
-    photoDiv.appendChild(textarea);
-    photoDiv.appendChild(controls);
-    photoContainer.appendChild(photoDiv);
-});
+            const moveUpBtn = document.createElement('button');
+            moveUpBtn.textContent = '↑';
+            moveUpBtn.addEventListener('click', () => window.movePhoto(photo.id, -1));
 
-updatePhotoOrders();
+            const moveDownBtn = document.createElement('button');
+            moveDownBtn.textContent = '↓';
+            moveDownBtn.addEventListener('click', () => window.movePhoto(photo.id, 1));
+
+            const removeBtn = document.createElement('button');
+            removeBtn.textContent = 'Удалить';
+            removeBtn.addEventListener('click', () => window.removePhoto(photo.id));
+
+            controls.append(moveUpBtn, moveDownBtn, removeBtn);
+
+            photoDiv.append(img, commentTextarea, controls);
+            photoContainer.appendChild(photoDiv);
+        });
 }
