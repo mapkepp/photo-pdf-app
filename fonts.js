@@ -1,12 +1,15 @@
 export async function loadFont() {
-    if (window.DejaVuSansLoaded) return;
+    if (window.DejaVuSansLoaded) {
+        console.log('🔁 Шрифт DejaVuSans уже загружен, пропускаем загрузку');
+        return;
+    }
 
     await waitForJsPDF();
 
     try {
         const fontUrl = './DejaVuSans.ttf';
 
-        // Проверка доступности файла перед загрузкой
+        // Проверка доступности файла
         const checkResponse = await fetch(fontUrl, { method: 'HEAD' });
         if (!checkResponse.ok) {
             throw new Error(`Файл шрифта не найден: ${fontUrl}`);
@@ -22,11 +25,21 @@ export async function loadFont() {
 
         const doc = new window.jspdf.jsPDF();
 
-        // Добавляем шрифт в виртуальную файловую систему
+        // Добавляем шрифт в vFS
         doc.addFileToVFS('DejaVuSans.ttf', base64Font);
 
-        // Регистрируем шрифт с указанием имени и стиля
+        // Регистрируем шрифт
         doc.addFont('DejaVuSans.ttf', 'DejaVuSans', 'normal');
+
+        // Проверяем, что шрифт действительно зарегистрирован
+        const availableFonts = doc.getFontList();
+        const hasDejaVu = Object.keys(availableFonts).some(fontName =>
+            fontName.toLowerCase().includes('dejavusans')
+        );
+
+        if (!hasDejaVu) {
+            throw new Error('Шрифт DejaVuSans не зарегистрирован в системе шрифтов jsPDF');
+        }
 
         window.DejaVuSansLoaded = true;
         console.log('✓ Шрифт DejaVuSans успешно загружен и зарегистрирован');
