@@ -1,32 +1,17 @@
 export async function loadFont() {
+    // Если шрифт уже загружен, ничего не делаем
+    if (window.DejaVuSansLoaded) return;
+
     try {
-        // Загружаем локальный шрифт из корня каталога
-        const fontResponse = await fetch('DejaVuSans.ttf');
-        if (!fontResponse.ok) {
-            throw new Error(`Ошибка загрузки шрифта: ${fontResponse.status} ${fontResponse.statusText}`);
-        }
+        // Загрузка шрифта DejaVuSans (должен быть доступен по пути)
+        const fontUrl = 'DejaVuSans.ttf'; // Укажите корректный путь
+        const response = await fetch(fontUrl);
+        const buffer = await response.arrayBuffer();
 
-        const fontArrayBuffer = await fontResponse.arrayBuffer();
-        const { jsPDF } = window.jspdf;
-
-        // Конвертируем ArrayBuffer в Base64
-        const base64String = arrayBufferToBase64(fontArrayBuffer);
-
-        // Добавляем шрифт в виртуальную файловую систему jsPDF
-        jsPDF.API.addFileToVFS('DejaVuSans.ttf', base64String);
-        jsPDF.API.addFont('DejaVuSans.ttf', 'DejaVuSans', 'normal');
+        // Регистрация шрифта в jsPDF
+        window.jspdf.API.addFont(buffer, 'DejaVuSans', 'normal');
+        window.DejaVuSansLoaded = true;
     } catch (error) {
-        console.error('Не удалось загрузить шрифт DejaVuSans:', error);
-        throw error;
+        console.warn('Шрифт DejaVuSans не загружен, используется стандартный:', error);
     }
-}
-
-// Вспомогательная функция: конвертирует ArrayBuffer в Base64
-function arrayBufferToBase64(buffer) {
-    let binary = '';
-    const bytes = new Uint8Array(buffer);
-    for (let i = 0; i < bytes.byteLength; i++) {
-        binary += String.fromCharCode(bytes[i]);
-    }
-    return btoa(binary);
 }
