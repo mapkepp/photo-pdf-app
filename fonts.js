@@ -22,11 +22,21 @@ export async function loadFont() {
         // Добавляем шрифт в виртуальную файловую систему (vFS)
         doc.addFileToVFS('DejaVuSans.ttf', base64Font);
 
-        // Загружаем шрифт из vFS
-        doc.loadFont('DejaVuSans.ttf', 'DejaVuSans', 'normal');
+        // Регистрируем шрифт через addFont (используем прямой вызов API, если доступен)
+        if (window.jspdf && window.jspdf.API && typeof window.jspdf.API.addFont === 'function') {
+            window.jspdf.API.addFont(base64Font, 'DejaVuSans', 'normal');
+        } else {
+            // Альтернативный способ — создаём временный документ и регистрируем шрифт
+            const tempDoc = new window.jspdf.jsPDF();
+            if (typeof tempDoc.addFont === 'function') {
+                tempDoc.addFont(base64Font, 'DejaVuSans', 'normal');
+            } else {
+                throw new Error('Ни один из методов добавления шрифта (addFont/API.addFont) не доступен');
+            }
+        }
 
         window.DejaVuSansLoaded = true;
-        console.log('✓ Шрифт DejaVuSans успешно загружен и зарегистрирован через vFS');
+        console.log('✓ Шрифт DejaVuSans успешно загружен и зарегистрирован');
     } catch (error) {
         console.error('❌ Критическая ошибка: шрифт DejaVuSans не загружен:', error.message);
         throw error;
