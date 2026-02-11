@@ -3,31 +3,32 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Фото в PDF</title>
+    <title>Генератор PDF с фотографиями</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div class="container">
-        <h1>Создание PDF из фотографий</h1>
+        <h1>Генератор PDF с фотографиями</h1>
         
-        <label for="title">Заголовок:</label>
-        <input type="text" id="title" placeholder="Введите заголовок на кириллице">
+        <div class="input-group">
+            <label for="title">Заголовок PDF:</label>
+            <input type="text" id="title" placeholder="Введите заголовок (например, 'Семейный альбом')" value="Мои фотографии">
+        </div>
         
-        <label for="photo-upload">Добавить фотографии:</label>
-        <input type="file" id="photo-upload" accept="image/*" multiple>
-        
-        <div id="photo-container"></div>
+        <div class="input-group">
+            <label for="photo-upload">Загрузите фотографии:</label>
+            <input type="file" id="photo-upload" accept="image/*" multiple>
+        </div>
         
         <button id="generate-pdf">Сгенерировать PDF</button>
-        <a id="download-link" class="hidden" download="my-photos.pdf">Скачать PDF</a>
+        <a id="download-link" class="hidden" download="мои_фотографии.pdf">Скачать PDF</a>
+        
+        <div id="photo-container"></div>
     </div>
 
-    <!-- Библиотека jsPDF -->
+    <!-- Подключаем библиотеки -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <!-- Шрифт DejaVu Sans для кириллицы -->
-    <script>
-        window.DejaVuFont = 'https://cdnjs.cloudflare.com/ajax/libs/dejavu-sans-ttf/1.0.0/DejaVuSans.ttf';
-    </script>
-    <script src="script.js"></script>
+    <!-- Главный скрипт -->
+    <script type="module" src="main.js"></script>
 </body>
 </html>
