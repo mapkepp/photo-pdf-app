@@ -91,13 +91,27 @@
             }, 500);
         });
 
-        // Обработчик загрузки фото
+        // Обработчик загрузки фото — активирует кнопку после выбора файлов
         document.getElementById('photo-upload').addEventListener('change', (e) => {
             const files = e.target.files;
+            const generatePdfButton = document.getElementById('generate-pdf');
+
             if (files.length > 0) {
+                // Сохраняем файлы в глобальную переменную
                 window.photos = Array.from(files);
-                document.getElementById('generate-pdf').disabled = false;
-                alert(`Загружено ${files.length} фото(ов)`);
+
+                // Активируем кнопку
+                generatePdfButton.disabled = false;
+                console.log(`✓ Загружено ${files.length} фото(ов), кнопка активирована`);
+
+                // Обновляем статус
+                const status = document.getElementById('pdf-status');
+                status.textContent = `Загружено ${files.length} фото(ов). Готов к созданию PDF.`;
+                status.style.color = 'blue';
+            } else {
+                // Если файлов нет, деактивируем кнопку
+                generatePdfButton.disabled = true;
+                console.log('ℹ️ Фото не выбраны, кнопка деактивирована');
             }
         });
     </script>
