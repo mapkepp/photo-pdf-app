@@ -1,14 +1,13 @@
 import { loadFont } from './fonts.js';
-import { createPdfDocument } from './pdf-utils.js';
-import { renderPhotoWithComment } from './pdf-photo-renderer.js';
+import { createPdfDocument, savePdfDocument } from './pdf-utils.js';
 import { addNewPageIfNeeded, initializePage } from './pdf-page-manager.js';
+import { renderPhotoWithComment } from './pdf-photo-renderer.js';
 
 export async function generatePdf(elements) {
-    const { jsPDF } = window.jspdf;
-
     try {
         await loadFont();
         let doc = createPdfDocument();
+
         const title = elements.titleInput.value || 'Мои фотографии';
         doc.setFontSize(20);
         doc.text(title, 105, 20, { align: 'center' });
