@@ -45,16 +45,23 @@ export async function generatePdf(photos, downloadLink) {
         }
         console.log('✓ Документ PDF создан');
 
+        // Конвертация файлов в Data URLs
+        console.log('🔄 Конвертируем файлы в Data URLs...');
+        const photoDataUrls = await Promise.all(
+            photos.map(file => convertFileToDataUrl(file))
+        );
+        console.log('✓ Все фото конвертированы в Data URLs');
+
         // Добавление фото
-        if (photos && photos.length > 0) {
-            console.log(`📷 Добавляем ${photos.length} фото в PDF...`);
-            for (let i = 0; i < photos.length; i++) {
-                const imgData = photos[i];
+        if (photoDataUrls && photoDataUrls.length > 0) {
+            console.log(`📷 Добавляем ${photoDataUrls.length} фото в PDF...`);
+            for (let i = 0; i < photoDataUrls.length; i++) {
+                const imgData = photoDataUrls[i];
                 if (imgData) {
                     doc.addImage(imgData, 'JPEG', 10, 10 + i * 200, 190, 0);
-            console.log(`✓ Фото ${i + 1} добавлено в PDF`);
+                    console.log(`✓ Фото ${i + 1} добавлено в PDF`);
                 } else {
-            console.warn(`⚠️ Фото ${i + 1} отсутствует в массиве photos`);
+                    console.warn(`⚠️ Фото ${i + 1} не удалось конвертировать в Data URL`);
                 }
             }
         } else {
@@ -82,4 +89,14 @@ export async function generatePdf(photos, downloadLink) {
     } finally {
         console.groupEnd();
     }
+}
+
+// Функция конвертации File в Data URL
+async function convertFileToDataUrl(file) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = () => reject(reader.error);
+        reader.readAsDataURL(file);
+    });
 }
