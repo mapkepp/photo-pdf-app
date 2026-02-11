@@ -1,4 +1,3 @@
-// pdf-page-manager.js — управление страницами
 export function checkAndAddNewPage(doc, currentY) {
     if (currentY > 280) {
         doc.addPage();
