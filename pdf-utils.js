@@ -5,12 +5,14 @@ export function createPdfDocument() {
         format: 'a4'
     });
 
-    // Устанавливаем стандартный шрифт (чтобы избежать ошибок)
-    try {
+    // Проверяем доступность шрифта перед установкой
+    const availableFonts = doc.getFontList();
+    if (availableFonts['dejavusans'] || availableFonts['DejaVuSans']) {
         doc.setFont('DejaVuSans');
-    } catch (e) {
-        // Если DejaVuSans недоступен, используем стандартный
-        console.warn('Шрифт DejaVuSans недоступен, используется стандартный');
+        console.log('✓ Используется шрифт DejaVuSans');
+    } else {
+        console.warn('⚠ Шрифт DejaVuSans недоступен, используется стандартный');
+        // Не выбрасываем ошибку — продолжаем со стандартным шрифтом
     }
 
     return doc;
