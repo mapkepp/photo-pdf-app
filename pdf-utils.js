@@ -5,18 +5,14 @@ export function createPdfDocument() {
         format: 'a4'
     });
 
-    // Безопасная установка шрифта — проверяем доступность
-    try {
-        const availableFonts = doc.getFontList();
-        if (availableFonts['dejavusans'] || availableFonts['DejaVuSans']) {
-            doc.setFont('DejaVuSans');
-            console.log('✓ Используется шрифт DejaVuSans');
-        } else {
-            console.warn('⚠ Шрифт DejaVuSans недоступен, используется стандартный');
-        }
-    } catch (e) {
-        console.warn('Ошибка при установке шрифта:', e.message);
+    // ОБЯЗАТЕЛЬНАЯ проверка доступности DejaVuSans перед использованием
+    const availableFonts = doc.getFontList();
+    if (!(availableFonts['dejavusans'] || availableFonts['DejaVuSans'])) {
+        throw new Error('Шрифт DejaVuSans не зарегистрирован. Невозможно создать PDF с кириллицей');
     }
+
+    doc.setFont('DejaVuSans');
+    console.log('✓ Используется шрифт DejaVuSans (кириллица гарантирована)');
 
     return doc;
 }
