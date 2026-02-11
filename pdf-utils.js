@@ -5,7 +5,7 @@ export function createPdfDocument() {
         format: 'a4'
     });
 
-    // Проверяем доступность шрифта — ищем точное совпадение
+    // Проверяем доступность шрифта — ищем точное совпадение в списке
     const availableFonts = doc.getFontList();
     const hasDejaVu = Object.keys(availableFonts).some(fontName =>
         fontName.toLowerCase().includes('dejavusans')
