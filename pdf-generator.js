@@ -4,13 +4,7 @@ import { renderSinglePhoto } from './pdf-photo-renderer.js';
 
 export async function generatePdf(elements) {
     try {
-        // Явная проверка готовности jsPDF
-        if (!window.jspdf) {
-            alert('Библиотека jsPDF ещё не загрузилась. Подождите несколько секунд и попробуйте снова.');
-            console.error('jsPDF не загружен при попытке генерации PDF');
-            return;
-        }
-
+        // Сначала ждём загрузки jsPDF и шрифта
         await loadFont();
 
         // Создаём документ
@@ -41,6 +35,6 @@ export async function generatePdf(elements) {
 
     } catch (error) {
         console.error('❌ Ошибка при генерации PDF:', error);
-        alert('Произошла ошибка при создании PDF. Проверьте консоль для деталей.');
+        alert('Произошла ошибка при создании PDF:\n' + error.message + '\nПроверьте консоль для деталей.');
     }
 }
