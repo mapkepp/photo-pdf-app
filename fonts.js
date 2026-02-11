@@ -1,8 +1,32 @@
-// Base64-строка шрифта DejaVu Sans (кириллица поддерживается)
-// Для краткости показана только часть строки — замените на полную Base64 вашего шрифта
-export const dejaVuFontBase64 = `AAEAAAAQAQAABAAARkZUTW0ilfQAAATMAAAAHEdERUYAKgAGAAAFKAAAAB5PUy8yD+xJ3wAAAVgAAABWY21hcE9Z9v4AAAGIAAABDmNtYXB0gAPvAAACNAAAACRjdnQgB9sIiwAAAogAAAAcZ2...`;
+export async function loadFont() {
+    try {
+        // Загружаем локальный шрифт из корня каталога
+        const fontResponse = await fetch('DejaVuSans.ttf');
+        if (!fontResponse.ok) {
+            throw new Error(`Ошибка загрузки шрифта: ${fontResponse.status} ${fontResponse.statusText}`);
+        }
 
-// Чтобы получить полную строку:
-// 1. Скачайте DejaVuSans.ttf
-// 2. Конвертируйте в Base64 (онлайн‑конвертер или скрипт)
-// 3. Вставьте полную строку вместо многоточия
+        const fontArrayBuffer = await fontResponse.arrayBuffer();
+        const { jsPDF } = window.jspdf;
+
+        // Конвертируем ArrayBuffer в Base64
+        const base64String = arrayBufferToBase64(fontArrayBuffer);
+
+        // Добавляем шрифт в виртуальную файловую систему jsPDF
+        jsPDF.API.addFileToVFS('DejaVuSans.ttf', base64String);
+        jsPDF.API.addFont('DejaVuSans.ttf', 'DejaVuSans', 'normal');
+    } catch (error) {
+        console.error('Не удалось загрузить шрифт DejaVuSans:', error);
+        throw error;
+    }
+}
+
+// Вспомогательная функция: конвертирует ArrayBuffer в Base64
+function arrayBufferToBase64(buffer) {
+    let binary = '';
+    const bytes = new Uint8Array(buffer);
+    for (let i = 0; i < bytes.byteLength; i++) {
+        binary += String.fromCharCode(bytes[i]);
+    }
+    return btoa(binary);
+}
