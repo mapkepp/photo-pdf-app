@@ -5,12 +5,11 @@ export function createPdfDocument() {
         format: 'a4'
     });
 
-    // ОБЯЗАТЕЛЬНАЯ проверка доступности DejaVuSans перед использованием
+    // Проверяем доступность шрифта — ищем точное совпадение
     const availableFonts = doc.getFontList();
-    const hasDejaVu = availableFonts['dejavusans'] ||
-               availableFonts['DejaVuSans'] ||
-               availableFonts['dejavusans,normal'] ||
-               availableFonts['DejaVuSans,normal'];
+    const hasDejaVu = Object.keys(availableFonts).some(fontName =>
+        fontName.toLowerCase().includes('dejavusans')
+    );
 
     if (!hasDejaVu) {
         throw new Error('Шрифт DejaVuSans не зарегистрирован. Невозможно создать PDF с кириллицей');
