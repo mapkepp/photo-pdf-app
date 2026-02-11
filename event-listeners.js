@@ -5,6 +5,13 @@ export function initEventListeners() {
     const generatePdfBtn = document.getElementById('generate-pdf');
     const downloadLink = document.getElementById('download-link');
 
+    // Восстановление состояния из localStorage при загрузке
+    const savedPhotos = localStorage.getItem('photos');
+    if (savedPhotos) {
+        window.photos = JSON.parse(savedPhotos);
+        renderPhotos();
+    }
+
     // Обработчик загрузки фото
     uploadInput.addEventListener('change', handlePhotoUpload);
 
@@ -19,6 +26,9 @@ export function initEventListeners() {
 }
 
 function handlePhotoUpload(e) {
+    // Очистка перед загрузкой новых фото
+    window.photos = [];
+
     const files = e.target.files;
 
     Array.from(files).forEach(file => {
@@ -32,7 +42,12 @@ function handlePhotoUpload(e) {
             };
             window.photos.push(photo);
             renderPhotos();
+            // Сохраняем текущее состояние
+            localStorage.setItem('photos', JSON.stringify(window.photos));
         };
         reader.readAsDataURL(file);
     });
 }
+
+// Импортируем generatePdf из pdf-generator.js
+import { generatePdf } from './pdf-generator.js';
