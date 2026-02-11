@@ -9,12 +9,15 @@ export function createPdfDocument() {
     const availableFonts = doc.getFontList();
     console.log('Доступные шрифты:', Object.keys(availableFonts));
 
-    // Подробный поиск DejaVuSans
+    // Подробный поиск DejaVuSans с улучшенной логикой
     let fontFound = false;
     let matchingFontName = '';
 
     for (const fontName of Object.keys(availableFonts)) {
-        if (fontName.toLowerCase().includes('dejavusans')) {
+        const normalizedName = fontName.toLowerCase();
+        if (normalizedName.includes('dejavusans') ||
+            normalizedName.includes('dejavu') ||
+            normalizedName.includes('sans')) {
             fontFound = true;
             matchingFontName = fontName;
             break;
@@ -25,7 +28,7 @@ export function createPdfDocument() {
         console.warn('⚠️ Доступные шрифты:', Object.keys(availableFonts));
         // Резервный вариант: используем стандартный шрифт, если DejaVu не найден
         console.warn('⚠️ Шрифт DejaVuSans не найден, используем стандартный шрифт');
-        doc.setFont('Helvetica');
+        doc.setFont('helvetica'); // Используем строчную запись для совместимости
     } else {
         doc.setFont(matchingFontName);
         console.log(`✓ Используется шрифт ${matchingFontName} (кириллица гарантирована)`);
