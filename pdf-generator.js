@@ -1,13 +1,14 @@
 import { loadFont } from './fonts.js';
+import { createPdfDocument } from './pdf-utils.js';
+import { renderPhotoWithComment } from './pdf-photo-renderer.js';
+import { addNewPageIfNeeded, initializePage } from './pdf-page-manager.js';
 
 export async function generatePdf(elements) {
     const { jsPDF } = window.jspdf;
 
     try {
         await loadFont();
-        const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
-        doc.setFont('DejaVuSans');
-
+        let doc = createPdfDocument();
         const title = elements.titleInput.value || 'Мои фотографии';
         doc.setFontSize(20);
         doc.text(title, 105, 20, { align: 'center' });
@@ -16,34 +17,20 @@ export async function generatePdf(elements) {
         const photosPerPage = 5;
 
         for (let i = 0; i < window.photos.length; i++) {
+            // Управление страницами
             if (i % photosPerPage === 0 && i !== 0) {
-                doc.addPage();
-                yPosition = 20;
+                doc = addNewPageIfNeeded(doc, yPosition);
+                yPosition = initializePage();
             }
 
             const photo = window.photos[i];
-            doc.addImage(photo.src, 'JPEG', 10, yPosition, 190, 120);
-            yPosition += 130;
+            // Отрисовка фото и комментария
+            yPosition = renderPhotoWithComment(doc, photo, yPosition);
+        }
 
-            if (photo.comment) {
-                doc.setFontSize(12);
-                const splitComment = doc.splitTextToSize(photo.comment, 180);
-                splitComment.forEach(line => {
-                    if (yPosition > 280) {
-                doc.addPage();
-                yPosition = 20;
-            }
-            doc.text(line, 15, yPosition);
-            yPosition += 8;
-        }); // ЗАКРЫТИЕ forEach — закрывает обработку строки комментария
-        yPosition += 5;
-    } // ЗАКРЫТИЕ for — закрывает цикл по фотографиям
-
-        const pdfBlob = doc.output('blob');
-        const url = URL.createObjectURL(pdfBlob);
-        elements.downloadLink.href = url;
-        elements.downloadLink.classList.remove('hidden');
-    } catch (error) { // ЗАКРЫТИЕ try — корректно завершает блок try перед catch
+        // Сохранение PDF
+        savePdfDocument(doc, elements);
+    } catch (error) {
         console.error('Ошибка при генерации PDF:', error);
         alert('Произошла ошибка при создании PDF. Проверьте консоль для деталей.');
     }
