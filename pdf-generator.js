@@ -1,13 +1,15 @@
 import { loadFont } from './fonts.js';
 import { createPdfDocument, savePdfDocument } from './pdf-utils.js';
-import { addNewPageIfNeeded, initializePage } from './pdf-page-manager.js';
-import { renderPhotoWithComment } from './pdf-photo-renderer.js';
+import { renderSinglePhoto } from './pdf-photo-renderer.js';
 
 export async function generatePdf(elements) {
     try {
         await loadFont();
-        let doc = createPdfDocument();
 
+        // Создаём документ
+        const doc = createPdfDocument();
+
+        // Заголовок
         const title = elements.titleInput.value || 'Мои фотографии';
         doc.setFontSize(20);
         doc.text(title, 105, 20, { align: 'center' });
@@ -15,20 +17,21 @@ export async function generatePdf(elements) {
         let yPosition = 40;
         const photosPerPage = 5;
 
+        // Обработка фото
         for (let i = 0; i < window.photos.length; i++) {
-            // Управление страницами
+            // Новая страница каждые 5 фото
             if (i % photosPerPage === 0 && i !== 0) {
-                doc = addNewPageIfNeeded(doc, yPosition);
-                yPosition = initializePage();
+                doc.addPage();
+                yPosition = 20;
             }
 
             const photo = window.photos[i];
-            // Отрисовка фото и комментария
-            yPosition = renderPhotoWithComment(doc, photo, yPosition);
+            yPosition = renderSinglePhoto(doc, photo, yPosition);
         }
 
         // Сохранение PDF
-        savePdfDocument(doc, elements);
+        savePdfDocument(doc, elements.downloadLink);
+
     } catch (error) {
         console.error('Ошибка при генерации PDF:', error);
         alert('Произошла ошибка при создании PDF. Проверьте консоль для деталей.');
