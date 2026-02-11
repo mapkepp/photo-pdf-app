@@ -36,6 +36,7 @@
             margin: 2px;
             padding: 5px 10px;
         }
+
         /* Индикатор статуса */
         #pdf-status {
             margin: 10px 0;
@@ -43,12 +44,82 @@
             border-radius: 4px;
             font-weight: bold;
         }
+
+        /* Стили для контейнера предпросмотра фото */
+        .preview-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+            padding: 15px;
+            border: 2px dashed #ccc;
+            border-radius: 8px;
+            background-color: #f9f9f9;
+        }
+
+        /* Элемент предпросмотра фото */
+        .photo-preview-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Стили для изображения в предпросмотре */
+        .preview-image {
+            width: 100%;
+            max-width: 150px;
+            max-height: 150px;
+            object-fit: cover;
+            border-radius: 6px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s;
+        }
+
+        .preview-image:hover {
+            transform: scale(1.05);
+        }
+
+        /* Подпись под фото */
+        .preview-caption {
+            font-size: 12px;
+            text-align: center;
+            color: #666;
+            word-break: break-all;
+        }
+
+        /* Стили для элементов с ошибками */
+        .photo-preview-item.error {
+            background-color: #ffeaea;
+            padding: 10px;
+            border-radius: 6px;
+            text-align: center;
+        }
+
+        .error-icon {
+            font-size: 24px;
+            margin-bottom: 5px;
+        }
     </style>
 </head>
 <body>
     <h1>Предварительный просмотр фото</h1>
-    <input type="file" id="photo-upload" accept="image/jpeg,image/png,image/webp" multiple>
-    <div id="photo-container"></div>
+
+    <!-- Поле для загрузки фото -->
+    <div class="upload-section">
+        <label for="photo-upload" class="upload-label">
+            Выберите фотографии для добавления в PDF
+        </label>
+        <input type="file" id="photo-upload" accept="image/jpeg,image/png,image/webp" multiple>
+    </div>
+
+    <!-- Контейнер для предпросмотра -->
+    <div id="photo-preview" class="preview-container">
+        <!-- Здесь будут отображаться превью фото -->
+        <div class="empty-preview-message">
+            Загрузите фотографии для предпросмотра
+        </div>
+    </div>
 
     <h2>Генерация PDF</h2>
     <input type="text" id="title" placeholder="Заголовок PDF" value="Мои фотографии">
