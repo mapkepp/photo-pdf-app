@@ -73,19 +73,25 @@ function updatePhotoOrders() {
     });
 }
 
-generatePdfBtn.addEventListener('click', function() {
+generatePdfBtn.addEventListener('click', async function() {
     const { jsPDF } = window.jspdf;
 
-    // Создаём PDF с шрифтом для кириллицы
+    // Создаём PDF
     const doc = new jsPDF({
         orientation: 'portrait',
         unit: 'mm',
         format: 'a4'
     });
 
-    // Подключаем шрифт с поддержкой кириллицы
-    doc.addFont('https://cdnjs.cloudflare.com/ajax/libs/dejavu-sans-ttf/1.0.0/DejaVuSans.ttf', 'DejaVuSans', 'normal');
-    doc.setFont('DejaVuSans');
+    // Подключаем шрифт для кириллицы
+    try {
+        await doc.addFont(window.DejaVuFont, 'DejaVuSans', 'normal');
+        doc.setFont('DejaVuSans');
+    } catch (error) {
+        console.error('Ошибка загрузки шрифта:', error);
+        // Если шрифт не загрузился, используем стандартный (кириллица может не работать)
+        doc.setFont('helvetica');
+    }
 
     const title = titleInput.value || 'Мои фотографии';
     doc.setFontSize(20);
@@ -94,20 +100,23 @@ generatePdfBtn.addEventListener('click', function() {
     let yPosition = 40;
 
     photos.sort((a, b) => a.order - b.order).forEach(photo => {
+        // Проверяем, нужно ли добавить новую страницу
         if (yPosition > 250) {
             doc.addPage();
             yPosition = 20;
         }
 
-        // Фото
+        // Добавляем изображение
         doc.addImage(photo.src, 'JPEG', 10, yPosition, 190, 120);
-        yPosition += 130;
+        yPosition += 130; // Позиция после фото (высота фото + отступ)
 
-        // Комментарий ПОД фото
-        if (photo.comment) {
+        // Добавляем комментарий ПОД фото
+        if (photo.comment && photo.comment.trim() !== '') {
             doc.setFontSize(12);
             const splitComment = doc.splitTextToSize(photo.comment, 180);
+
             splitComment.forEach(line => {
+                // Проверяем, не выходит ли текст за пределы страницы
                 if (yPosition > 280) {
                     doc.addPage();
                     yPosition = 20;
@@ -115,12 +124,28 @@ generatePdfBtn.addEventListener('click', function() {
                 doc.text(line, 15, yPosition);
                 yPosition += 8;
             });
-            yPosition += 5;
+            yPosition += 5; // Дополнительный отступ после комментария
         }
     });
 
+    // Создаём ссылку для скачивания
     const pdfBlob = doc.output('blob');
     const url = URL.createObjectURL(pdfBlob);
     downloadLink.href = url;
     downloadLink.classList.remove('hidden');
+
+    // Добавляем обработчик для освобождения памяти после скачивания
+    downloadLink.onclick = function() {
+        setTimeout(() => {
+            URL.revokeObjectURL(url);
+        }, 100);
+    };
+
+    console.log('PDF успешно создан! Количество фото:', photos.length);
+    console.log('Заголовок:', title);
+
+    // Дополнительная проверка: если нет фото, показываем предупреждение
+    if (photos.length === 0) {
+        alert('Предупреждение: в PDF не добавлены фотографии. Добавьте хотя бы одно фото.');
+    }
 });
