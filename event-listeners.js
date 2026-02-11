@@ -1,9 +1,10 @@
+import { generatePdf } from './pdf-generator.js';
+
 document.addEventListener('DOMContentLoaded', () => {
     console.group('🎛️ event-listeners: Инициализация обработчиков событий');
 
     const generatePdfButton = document.getElementById('generate-pdf');
     const downloadLink = document.getElementById('download-link');
-
 
     // Детальная диагностика элементов DOM
     console.log('🔎 Поиск элементов в DOM:');
