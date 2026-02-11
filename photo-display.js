@@ -1,19 +1,26 @@
-// photo-display.js
 import { updatePhotoOrders } from './photo-utils.js';
+
+if (!window.photos) window.photos = [];
+
+window.movePhoto = function(id, direction) {
+    const index = window.photos.findIndex(p => p.id === id);
+    if (index === -1) return;
+
+    const newIndex = index + direction;
+    if (newIndex >= 0 && newIndex < window.photos.length) {
+        [window.photos[index], window.photos[newIndex]] = [window.photos[newIndex], window.photos[index]];
+        renderPhotos();
+    }
+};
 
 export function renderPhotos() {
     const photoContainer = document.getElementById('photo-container');
-
     if (!photoContainer) {
-        console.error('Элемент #photo-container не найден в DOM');
+        console.error('Элемент #photo-container не найден');
         return;
     }
 
     photoContainer.innerHTML = '';
-
-    if (!window.photos) {
-        window.photos = [];
-    }
 
     window.photos
         .sort((a, b) => a.order - b.order)
@@ -25,7 +32,7 @@ export function renderPhotos() {
                 <textarea placeholder="Комментарий к фото" data-id="${photo.id}">${photo.comment}</textarea>
                 <div class="controls">
                     <button onclick="movePhoto(${photo.id}, -1)">←</button>
-                    <span>Позиция: ${index + 1}</span>
+            <span>Позиция: ${index + 1}</span>
             <button onclick="movePhoto(${photo.id}, 1)">→</button>
             <button onclick="removePhoto(${photo.id})">Удалить</button>
         </div>
@@ -45,28 +52,3 @@ export function renderPhotos() {
 
     updatePhotoOrders();
 }
-
-window.movePhoto = function(id, direction) {
-    if (!window.photos) {
-        window.photos = [];
-        return;
-    }
-
-    const index = window.photos.findIndex(p => p.id === id);
-    const newIndex = index + direction;
-
-    if (newIndex >= 0 && newIndex < window.photos.length) {
-        [window.photos[index], window.photos[newIndex]] = [window.photos[newIndex], window.photos[index]];
-        renderPhotos();
-    }
-};
-
-window.removePhoto = function(id) {
-    if (!window.photos) {
-        window.photos = [];
-        return;
-    }
-
-    window.photos = window.photos.filter(p => p.id !== id);
-    renderPhotos();
-};
