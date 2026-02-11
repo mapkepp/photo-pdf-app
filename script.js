@@ -85,7 +85,7 @@ generatePdfBtn.addEventListener('click', async function() {
 
     // Подключаем шрифт для кириллицы
     try {
-        await doc.addFont(window.DejaVuFont, 'DejaVuSans', 'normal');
+        await doc.addFont('https://cdnjs.cloudflare.com/ajax/libs/dejavu-sans-ttf/1.0.0/DejaVuSans.ttf', 'DejaVuSans', 'normal');
         doc.setFont('DejaVuSans');
     } catch (error) {
         console.error('Ошибка загрузки шрифта:', error);
@@ -119,7 +119,7 @@ generatePdfBtn.addEventListener('click', async function() {
                 // Проверяем, не выходит ли текст за пределы страницы
                 if (yPosition > 280) {
                     doc.addPage();
-                    yPosition = 20;
+            yPosition = 20;
                 }
                 doc.text(line, 15, yPosition);
                 yPosition += 8;
