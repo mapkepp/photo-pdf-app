@@ -27,6 +27,9 @@
             width: 100%;
             margin-top: 5px;
         }
+        .hidden {
+            display: none;
+        }
     </style>
 </head>
 <body>
@@ -39,6 +42,14 @@
     <button id="generate-pdf">Создать PDF</button>
     <a id="download-link" class="hidden" download="photos.pdf">Скачать PDF</a>
 
+    <!-- Подключаем jsPDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+    <!-- Подключаем модули ПОСЛЕ загрузки зависимостей -->
+    <script type="module" src="photo-utils.js"></script>
+    <script type="module" src="photo-display.js"></script>
+    <script type="module" src="fonts.js"></script>
+    <script type="module" src="pdf-generator.js"></script>
     <script type="module" src="event-listeners.js"></script>
 </body>
 </html>
