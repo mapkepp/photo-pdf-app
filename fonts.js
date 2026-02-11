@@ -29,28 +29,24 @@ export async function loadFont() {
         const buffer = await response.arrayBuffer();
         const base64Font = arrayBufferToBase64(buffer);
 
-        // Создаём временный документ для регистрации
-        const tempDoc = new window.jspdf.jsPDF();
+        // РЕГИСТРИРУЕМ ШРИФТ ГЛОБАЛЬНО — ключевое изменение
+        window.jspdf.API.addFileToVFS('DejaVuSans.ttf', base64Font);
+        window.jspdf.API.addFont('DejaVuSans.ttf', 'DejaVuSans', 'normal');
 
-        // Добавляем в vFS
-        tempDoc.addFileToVFS('DejaVuSans.ttf', base64Font);
-
-        // Регистрируем шрифт с явным указанием параметров
-        tempDoc.addFont('DejaVuSans.ttf', 'DejaVuSans', 'normal');
-
-        // Проверяем регистрацию
-        const availableFonts = tempDoc.getFontList();
+        // Проверяем глобальную регистрацию
+        const testDoc = new window.jspdf.jsPDF();
+        const availableFonts = testDoc.getFontList();
         const hasDejaVu = Object.keys(availableFonts).some(fontName =>
             fontName.toLowerCase().includes('dejavusans')
         );
 
         if (!hasDejaVu) {
-            console.error('❌ Шрифт не зарегистрирован в tempDoc');
+            console.error('❌ Шрифт не зарегистрирован глобально');
             throw new Error('Шрифт DejaVuSans не зарегистрирован в системе шрифтов jsPDF');
         }
 
         window.DejaVuSansLoaded = true;
-        console.log('✓ Шрифт DejaVuSans успешно загружен и зарегистрирован');
+        console.log('✓ Шрифт DejaVuSans успешно загружен и зарегистрирован ГЛОБАЛЬНО');
     } catch (error) {
         console.error('❌ Критическая ошибка загрузки шрифта:', error.message);
         throw error;
@@ -82,7 +78,7 @@ function waitForJsPDF() {
                 resolve();
             } else if (++attempts >= maxAttempts) {
                 clearInterval(checkInterval);
-                reject(new Error('jsPDF не загрузился в течение 10 секунд'));
+                reject(new Error('jsPDF не загрузился в течение 10 секунд'));
             }
         }, 100);
     });
