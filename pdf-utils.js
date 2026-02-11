@@ -9,17 +9,25 @@ export function createPdfDocument() {
     const availableFonts = doc.getFontList();
     console.log('Доступные шрифты:', Object.keys(availableFonts));
 
-    const hasDejaVu = Object.keys(availableFonts).some(fontName =>
-        fontName.toLowerCase().includes('dejavusans')
-    );
+    // Подробный поиск DejaVuSans
+    let fontFound = false;
+    let matchingFontName = '';
 
-    if (!hasDejaVu) {
-        console.warn('⚠️ Предупреждение: шрифт DejaVuSans не найден среди доступных шрифтов');
+    for (const fontName of Object.keys(availableFonts)) {
+        if (fontName.toLowerCase().includes('dejavusans')) {
+            fontFound = true;
+            matchingFontName = fontName;
+            break;
+        }
+    }
+
+    if (!fontFound) {
+        console.warn('⚠️ Доступные шрифты:', Object.keys(availableFonts));
         throw new Error('Шрифт DejaVuSans не зарегистрирован. Невозможно создать PDF с кириллицей');
     }
 
-    doc.setFont('DejaVuSans');
-    console.log('✓ Используется шрифт DejaVuSans (кириллица гарантирована)');
+    doc.setFont(matchingFontName);
+    console.log(`✓ Используется шрифт ${matchingFontName} (кириллица гарантирована)`);
 
     return doc;
 }
