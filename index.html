@@ -66,5 +66,20 @@
     <script type="module" src="pdf-photo-renderer.js"></script>
     <script type="module" src="pdf-generator.js"></script>
     <script type="module" src="event-listeners.js"></script>
+    <script>
+    // Отслеживаем загрузку jsPDF
+    window.addEventListener('load', function() {
+        setTimeout(() => {
+            const status = document.getElementById('pdf-status');
+            if (window.jspdf) {
+                status.textContent = 'jsPDF загружен, готов к работе';
+                status.style.color = 'green';
+            } else {
+                status.textContent = 'Ошибка: jsPDF не загружен';
+                status.style.background = '#ffdddd';
+            }
+        }, 500);
+    });
+</script>
 </body>
 </html>
