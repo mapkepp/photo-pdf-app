@@ -66,7 +66,18 @@ function updatePhotoOrders() {
 
 generatePdfBtn.addEventListener('click', function() {
     const { jsPDF } = window.jspdf;
-    const doc = new jsPDF();
+
+    // Создаём PDF с указанием шрифта
+    const doc = new jsPDF({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: 'a4'
+    });
+
+    // Загружаем шрифт DejaVuSans (должен быть доступен по URL)
+    doc.addFont('https://cdnjs.cloudflare.com/ajax/libs/dejavu-sans-ttf/1.0.0/DejaVuSans.ttf', 'DejaVuSans', 'normal');
+    doc.setFont('DejaVuSans');
+
     const title = titleInput.value || 'Мои фотографии';
 
     doc.setFontSize(20);
@@ -83,21 +94,21 @@ generatePdfBtn.addEventListener('click', function() {
 
         // Добавляем изображение
         doc.addImage(photo.src, 'JPEG', 10, yPosition, 190, 120);
-        yPosition += 130;
+        yPosition += 130; // Позиция после фото
 
-        // Добавляем комментарий, если он есть
+        // Добавляем комментарий ПОД фото
         if (photo.comment) {
             doc.setFontSize(12);
             const splitComment = doc.splitTextToSize(photo.comment, 180);
             splitComment.forEach(line => {
-                if (yPosition > 280) {
+                if (yPosition > 280) { // Если текст выходит за пределы страницы
                     doc.addPage();
                     yPosition = 20;
                 }
                 doc.text(line, 15, yPosition);
                 yPosition += 8;
             });
-            yPosition += 10;
+            yPosition += 5; // Отступ после комментария
         }
     });
 
@@ -107,3 +118,4 @@ generatePdfBtn.addEventListener('click', function() {
     downloadLink.href = url;
     downloadLink.classList.remove('hidden');
 });
+
