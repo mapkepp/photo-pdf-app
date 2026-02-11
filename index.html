@@ -2,33 +2,43 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Генератор PDF с фотографиями</title>
-    <link rel="stylesheet" href="style.css">
+    <title>Просмотр фото</title>
+    <style>
+        .photo-item {
+            margin: 10px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            max-width: 300px;
+        }
+        .photo-item img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+        }
+        .controls {
+            margin-top: 5px;
+        }
+        #photo-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        textarea {
+            width: 100%;
+            margin-top: 5px;
+        }
+    </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Генератор PDF с фотографиями</h1>
-        
-        <div class="input-group">
-            <label for="title">Заголовок PDF:</label>
-            <input type="text" id="title" placeholder="Введите заголовок (например, 'Семейный альбом')" value="Мои фотографии">
-        </div>
-        
-        <div class="input-group">
-            <label for="photo-upload">Загрузите фотографии:</label>
-            <input type="file" id="photo-upload" accept="image/*" multiple>
-        </div>
-        
-        <button id="generate-pdf">Сгенерировать PDF</button>
-        <a id="download-link" class="hidden" download="мои_фотографии.pdf">Скачать PDF</a>
-        
-        <div id="photo-container"></div>
-    </div>
+    <h1>Предварительный просмотр фото</h1>
+    <input type="file" id="photo-upload" accept="image/jpeg,image/png,image/webp" multiple>
+    <div id="photo-container"></div>
 
-    <!-- Подключаем библиотеки -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <!-- Главный скрипт -->
-    <script type="module" src="main.js"></script>
+    <h2>Генерация PDF</h2>
+    <input type="text" id="title" placeholder="Заголовок PDF" value="Мои фотографии">
+    <button id="generate-pdf">Создать PDF</button>
+    <a id="download-link" class="hidden" download="photos.pdf">Скачать PDF</a>
+
+    <script type="module" src="event-listeners.js"></script>
 </body>
 </html>
