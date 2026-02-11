@@ -1,13 +1,13 @@
-export function createPdfDocument() {
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
-    doc.setFont('DejaVuSans');
-    return doc;
+export function updatePhotoOrders() {
+    if (!window.photos) {
+        console.warn('Массив window.photos не инициализирован');
+        return;
+    }
+    window.photos.forEach((photo, index) => {
+        photo.order = index;
+    });
 }
 
-export function savePdfDocument(doc, elements) {
-    const pdfBlob = doc.output('blob');
-    const url = URL.createObjectURL(pdfBlob);
-    elements.downloadLink.href = url;
-    elements.downloadLink.classList.remove('hidden');
+export function clearPhotos() {
+    window.photos = [];
 }
