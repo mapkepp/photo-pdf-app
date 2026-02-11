@@ -14,25 +14,29 @@ export async function loadFont() {
         }
         const buffer = await response.arrayBuffer();
 
-        // Принудительная регистрация шрифта — используем правильный метод для текущей версии jsPDF
-        if (window.jspdf && window.jspdf.API && window.jspdf.API.addFont) {
-            window.jspdf.API.addFont(buffer, 'DejaVuSans', 'normal');
-            window.DejaVuSansLoaded = true;
-            console.log('✓ Шрифт DejaVuSans успешно загружен и зарегистрирован');
-        } else {
-            // Альтернативный метод регистрации (для старых версий jsPDF)
-            const doc = new window.jspdf.jsPDF();
-            if (doc.addFont) {
-                doc.addFont(buffer, 'DejaVuSans', 'normal');
-                window.DejaVuSansLoaded = true;
-                console.log('✓ Шрифт DejaVuSans загружен альтернативным методом');
+        // Проверяем доступность методов addFont в разных версиях jsPDF
+        const jsPDF = window.jspdf;
+
+        if (jsPDF && jsPDF.API && typeof jsPDF.API.addFont === 'function') {
+            // Основной способ (для современных версий)
+            jsPDF.API.addFont(buffer, 'DejaVuSans', 'normal');
+        } else if (jsPDF && typeof jsPDF.jsPDF === 'function') {
+            // Альтернативный способ — создаём временный документ для регистрации шрифта
+            const tempDoc = new jsPDF.jsPDF();
+            if (typeof tempDoc.addFont === 'function') {
+                tempDoc.addFont(buffer, 'DejaVuSans', 'normal');
             } else {
-                throw new Error('Ни один из методов добавления шрифта (addFont/API.addFont) не доступен');
+                throw new Error('Метод addFont недоступен в текущей версии jsPDF');
             }
+        } else {
+            throw new Error('jsPDF не инициализирован корректно или API недоступно');
         }
+
+        window.DejaVuSansLoaded = true;
+        console.log('✓ Шрифт DejaVuSans успешно загружен и зарегистрирован');
     } catch (error) {
         console.error('❌ Критическая ошибка: шрифт DejaVuSans не загружен:', error.message);
-        throw error; // Не продолжаем без шрифта — кириллица обязательна
+        throw error;
     }
 }
 
