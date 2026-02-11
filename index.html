@@ -22,21 +22,12 @@
         <a id="download-link" class="hidden" download="my-photos.pdf">Скачать PDF</a>
     </div>
 
-    <!-- Подключаем библиотеку jsPDF для генерации PDF -->
+    <!-- Библиотека jsPDF -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <!-- Подключаем шрифт DejaVu Sans для поддержки кириллицы -->
+    <!-- Шрифт DejaVu Sans для кириллицы -->
     <script>
-        // Загружаем шрифт DejaVuSans для поддержки кириллических символов
-        const fontUrl = 'https://cdnjs.cloudflare.com/ajax/libs/dejavu-sans-ttf/1.0.0/DejaVuSans.ttf';
-        fetch(fontUrl)
-            .then(response => response.arrayBuffer())
-            .then(buffer => {
-                // Глобальная переменная для хранения шрифта
-                window.dejaVuFont = buffer;
-            })
-            .catch(err => console.error('Ошибка загрузки шрифта:', err));
+        window.DejaVuFont = 'https://cdnjs.cloudflare.com/ajax/libs/dejavu-sans-ttf/1.0.0/DejaVuSans.ttf';
     </script>
-    <!-- Подключаем наш скрипт с логикой приложения -->
     <script src="script.js"></script>
 </body>
 </html>
