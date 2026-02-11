@@ -1,25 +1,9 @@
-export async function loadFont() 
-export async function debugFontLoading() {
-    console.log('=== ДИАГНОСТИКА ЗАГРУЗКИ ШРИФТА===');
-    console.log('jsPDF доступен:', !!window.jspdf);
-    console.log('API доступен:', !!(window.jspdf && window.jspdf.API));
-
-    try {
-        const response = await fetch('./DejaVuSans.ttf');
-        console.log('Файл шрифта доступен:', response.ok);
-    } catch (e) {
-        console.log('Ошибка доступа к файлу шрифта:', e.message);
-    }
-}
-// Вызовите один раз для диагностики:
-// debugFontLoading();
-
-{
+export async function loadFont() {
     // Если шрифт уже загружен, ничего не делаем
     if (window.DejaVuSansLoaded) return;
 
-    // Ждём готовности jsPDF и его API
-    await waitForJsPDFAndAPI();
+    // Ждём готовности jsPDF
+    await waitForJsPDF();
 
     try {
         // Загрузка шрифта DejaVuSans
@@ -30,35 +14,30 @@ export async function debugFontLoading() {
         }
         const buffer = await response.arrayBuffer();
 
-        // Регистрация шрифта в jsPDF
-        window.jspdf.API.addFont(buffer, 'DejaVuSans', 'normal');
-        window.DejaVuSansLoaded = true;
-        console.log('✓ Шрифт DejaVuSans успешно загружен и зарегистрирован');
+        // Альтернативный способ регистрации шрифта — ищем корректный метод
+        if (window.jspdf && window.jspdf.jsPDF) {
+            const doc = new window.jspdf.jsPDF();
+            // Проверяем наличие метода addFont
+            if (doc.addFont) {
+                doc.addFont(buffer, 'DejaVuSans', 'normal');
+                window.DejaVuSansLoaded = true;
+                console.log('✓ Шрифт DejaVuSans успешно загружен и зарегистрирован');
+            } else {
+                // Если addFont отсутствует, используем стандартный шрифт
+                console.warn('⚠ Метод addFont не найден, используется стандартный шрифт');
+                throw new Error('Метод addFont не доступен в текущей версии jsPDF');
+            }
+        } else {
+            throw new Error('jsPDF не инициализирован корректно');
+        }
     } catch (error) {
         console.error('❌ Критическая ошибка: шрифт DejaVuSans не загружен:', error.message);
         throw error;
     }
 }
 
-// Функция ожидания загрузки jsPDF и его API
-function waitForJsPDFAndAPI() {
+// Функция ожидания загрузки jsPDF с проверкой структуры
+function waitForJsPDF() {
     return new Promise((resolve, reject) => {
-        if (window.jspdf && window.jspdf.API) {
+        if (window.jspdf) {
             resolve();
-            return;
-        }
-
-        let attempts = 0;
-        const maxAttempts = 100; // 10 секунд при проверке каждые 100 мс
-
-        const checkInterval = setInterval(() => {
-            if (window.jspdf && window.jspdf.API) {
-                clearInterval(checkInterval);
-                resolve();
-            } else if (++attempts >= maxAttempts) {
-                clearInterval(checkInterval);
-                reject(new Error('jsPDF или его API не загрузились в течение 10 секунд'));
-            }
-        }, 100);
-    });
-}
