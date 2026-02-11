@@ -16,4 +16,3 @@ export function renderPhotoWithComment(doc, photo, currentY) {
     }
 
     return newY;
-}
