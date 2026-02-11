@@ -52,7 +52,7 @@ export async function generatePdf(photos, downloadLink) {
                 const imgData = photos[i];
                 if (imgData) {
                     doc.addImage(imgData, 'JPEG', 10, 10 + i * 200, 190, 0);
-            console.log(`✓ Фото ${i + 1} добавлено в PDF`);
+                    console.log(`✓ Фото ${i + 1} добавлено в PDF`);
                 } else {
                     console.warn(`⚠️ Фото ${i + 1} отсутствует в массиве photos`);
                 }
