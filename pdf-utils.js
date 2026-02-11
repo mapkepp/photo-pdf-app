@@ -1,4 +1,3 @@
-// pdf-utils.js — только экспорт функций, без импортов
 export function createPdfDocument() {
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF({
