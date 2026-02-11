@@ -1,17 +1,26 @@
 export function createPdfDocument() {
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF({
+    const doc = new window.jspdf.jsPDF({
         orientation: 'portrait',
         unit: 'mm',
         format: 'a4'
     });
-    doc.setFont('DejaVuSans');
+
+    // Устанавливаем стандартный шрифт (чтобы избежать ошибок)
+    try {
+        doc.setFont('DejaVuSans');
+    } catch (e) {
+        // Если DejaVuSans недоступен, используем стандартный
+        console.warn('Шрифт DejaVuSans недоступен, используется стандартный');
+    }
+
     return doc;
 }
 
 export function savePdfDocument(doc, downloadLink) {
-    const pdfBlob = doc.output('blob');
-    const url = URL.createObjectURL(pdfBlob);
+    const pdfOutput = doc.output('blob');
+    const url = URL.createObjectURL(pdfOutput);
+
     downloadLink.href = url;
-    downloadLink.classList.remove('hidden');
+    downloadLink.click();
+    URL.revokeObjectURL(url);
 }
