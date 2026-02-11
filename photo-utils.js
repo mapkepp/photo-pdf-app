@@ -1,6 +1,7 @@
+// photo-utils.js
 export function updatePhotoOrders() {
     if (!window.photos) {
-        console.error('Массив window.photos не инициализирован');
+        console.warn('Массив window.photos не инициализирован, пропускаем обновление порядков');
         return;
     }
 
