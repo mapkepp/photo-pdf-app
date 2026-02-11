@@ -4,13 +4,13 @@ import { renderSinglePhoto } from './pdf-photo-renderer.js';
 
 export async function generatePdf(elements) {
     try {
-        // Сначала ждём загрузки jsPDF и шрифта
+        // Шаг 1: Загружаем шрифт (обязательно для кириллицы)
         await loadFont();
 
-        // Создаём документ
+        // Шаг 2: Создаём документ (только если шрифт доступен)
         const doc = createPdfDocument();
 
-        // Заголовок
+        // Шаг 3: Заголовок
         const title = elements.titleInput.value || 'Мои фотографии';
         doc.setFontSize(20);
         doc.text(title, 105, 20, { align: 'center' });
@@ -18,7 +18,7 @@ export async function generatePdf(elements) {
         let yPosition = 40;
         const photosPerPage = 5;
 
-        // Обработка фото
+        // Шаг 4: Обработка фото
         for (let i = 0; i < window.photos.length; i++) {
             // Новая страница каждые 5 фото
             if (i % photosPerPage === 0 && i !== 0) {
@@ -30,11 +30,11 @@ export async function generatePdf(elements) {
             yPosition = renderSinglePhoto(doc, photo, yPosition);
         }
 
-        // Сохранение PDF
+        // Шаг 5: Сохранение PDF
         savePdfDocument(doc, elements.downloadLink);
 
     } catch (error) {
         console.error('❌ Ошибка при генерации PDF:', error);
-        alert('Произошла ошибка при создании PDF:\n' + error.message + '\nПроверьте консоль для деталей.');
+        alert('Невозможно создать PDF: ' + error.message + '\nУбедитесь, что шрифт DejaVuSans.ttf находится в той же папке, что и index.html');
     }
 }
