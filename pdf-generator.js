@@ -5,16 +5,20 @@ export async function generatePdf(photos, downloadLink) {
     try {
         console.log('⏱️ Начинаем генерацию PDF...');
 
-        // Сначала загружаем шрифт (если ещё не загружен)
-        await loadFont();
+        // Загружаем шрифт с явной обработкой ошибок
+        await loadFont().catch(err => {
+            console.error('❌ Ошибка загрузки шрифта:', err.message);
+            throw err;
+        });
+
         console.log('✅ Шрифт загружен, продолжаем создание PDF');
 
-        // Создаём документ только после успешной загрузки шрифта
+        // Создаём документ
         const doc = createPdfDocument();
 
         // Добавляем фото (пример для одного фото)
         if (photos && photos.length > 0) {
-            const imgData = photos[0]; // замените на логику обработки всех фото
+            const imgData = photos[0];
             doc.addImage(imgData, 'JPEG', 10, 10, 190, 0); // автовысота
         }
 
@@ -27,6 +31,7 @@ export async function generatePdf(photos, downloadLink) {
         console.log('✓ PDF успешно создан и сохранён');
     } catch (error) {
         console.error('❌ Ошибка при генерации PDF:', error.message);
+        alert('Ошибка при создании PDF: ' + error.message + '\nПроверьте консоль (F12) для деталей.');
         throw error;
     }
 }
