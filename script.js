@@ -40,6 +40,15 @@ function renderPhotos() {
             </div>
         `;
         photoContainer.appendChild(photoDiv);
+
+        // Обновляем комментарии при вводе
+        const textarea = photoDiv.querySelector('textarea');
+        textarea.addEventListener('input', function() {
+            const photoId = this.getAttribute('data-id');
+            const comment = this.value;
+            const photo = photos.find(p => p.id == photoId);
+            if (photo) photo.comment = comment;
+        });
     });
     updatePhotoOrders();
 }
@@ -67,55 +76,51 @@ function updatePhotoOrders() {
 generatePdfBtn.addEventListener('click', function() {
     const { jsPDF } = window.jspdf;
 
-    // Создаём PDF с указанием шрифта
+    // Создаём PDF с шрифтом для кириллицы
     const doc = new jsPDF({
         orientation: 'portrait',
         unit: 'mm',
         format: 'a4'
     });
 
-    // Загружаем шрифт DejaVuSans (должен быть доступен по URL)
+    // Подключаем шрифт с поддержкой кириллицы
     doc.addFont('https://cdnjs.cloudflare.com/ajax/libs/dejavu-sans-ttf/1.0.0/DejaVuSans.ttf', 'DejaVuSans', 'normal');
     doc.setFont('DejaVuSans');
 
     const title = titleInput.value || 'Мои фотографии';
-
     doc.setFontSize(20);
     doc.text(title, 105, 20, { align: 'center' });
 
     let yPosition = 40;
 
     photos.sort((a, b) => a.order - b.order).forEach(photo => {
-        // Проверяем, нужно ли добавить новую страницу
         if (yPosition > 250) {
             doc.addPage();
             yPosition = 20;
         }
 
-        // Добавляем изображение
+        // Фото
         doc.addImage(photo.src, 'JPEG', 10, yPosition, 190, 120);
-        yPosition += 130; // Позиция после фото
+        yPosition += 130;
 
-        // Добавляем комментарий ПОД фото
+        // Комментарий ПОД фото
         if (photo.comment) {
             doc.setFontSize(12);
             const splitComment = doc.splitTextToSize(photo.comment, 180);
             splitComment.forEach(line => {
-                if (yPosition > 280) { // Если текст выходит за пределы страницы
+                if (yPosition > 280) {
                     doc.addPage();
                     yPosition = 20;
                 }
                 doc.text(line, 15, yPosition);
                 yPosition += 8;
             });
-            yPosition += 5; // Отступ после комментария
+            yPosition += 5;
         }
     });
 
-    // Создаём ссылку для скачивания
     const pdfBlob = doc.output('blob');
     const url = URL.createObjectURL(pdfBlob);
     downloadLink.href = url;
     downloadLink.classList.remove('hidden');
 });
-
