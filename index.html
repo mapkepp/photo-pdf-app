@@ -2,8 +2,7 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    
-<link rel="shortcut icon" type="image/x-icon" href="favicon.ico">
+    <link rel="shortcut icon" type="image/x-icon" href="favicon.ico">
     <meta name="msapplication-TileImage" content="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsQAAA7EAZUrDhsAAAANSURBVBhXYzh8+PB/AAffA0nNPuCLAAAAAElFTkSuQmCC">
     <title>Просмотр фото</title>
     <style>
@@ -69,42 +68,38 @@
     <script type="module" src="pdf-photo-renderer.js"></script>
     <script type="module" src="pdf-generator.js"></script>
     <script type="module" src="event-listeners.js"></script>
+
     <script>
-    // Отслеживаем загрузку jsPDF
-    window.addEventListener('load', function() {
-        setTimeout(() => {
-            const status = document.getElementById('pdf-status');
-            if (window.jspdf) {
-                status.textContent = 'jsPDF загружен, готов к работе';
-                status.style.color = 'green';
-            } else {
-                status.textContent = 'Ошибка: jsPDF не загружен';
-                status.style.background = '#ffdddd';
+        // Глобальная переменная для хранения фото
+        window.photos = [];
+
+        // Отслеживаем загрузку jsPDF
+        window.addEventListener('load', function() {
+            setTimeout(() => {
+                const status = document.getElementById('pdf-status');
+                if (window.jspdf) {
+                    status.textContent = 'jsPDF загружен, готов к работе';
+            status.style.color = 'green';
+
+            // Дополнительная диагностика
+            console.log('jsPDF объект:', window.jspdf);
+            console.log('Доступен ли addFont:', !!(window.jspdf.jsPDF && window.jspdf.jsPDF.prototype.addFont));
+        } else {
+            status.textContent = 'Ошибка: jsPDF не загружен';
+            status.style.background = '#ffdddd';
+        }
+            }, 500);
+        });
+
+        // Обработчик загрузки фото
+        document.getElementById('photo-upload').addEventListener('change', (e) => {
+            const files = e.target.files;
+            if (files.length > 0) {
+                window.photos = Array.from(files);
+                document.getElementById('generate-pdf').disabled = false;
+                alert(`Загружено ${files.length} фото(ов)`);
             }
-        }, 500);
-    });
-</script>
-    <script>
-    // Диагностика загрузки jsPDF и шрифта
-    window.addEventListener('load', function() {
-        setTimeout(() => {
-            const status = document.getElementById('pdf-status');
-
-            if (window.jspdf) {
-                status.textContent = 'jsPDF загружен, готов к работе';
-                status.style.color = 'green';
-
-                // Дополнительная диагностика
-                console.log('jsPDF объект:', window.jspdf);
-                console.log('Доступен ли addFont:', !!(window.jspdf.jsPDF && window.jspdf.jsPDF.prototype.addFont));
-            } else {
-                status.textContent = 'Ошибка: jsPDF не загружен';
-                status.style.background = '#ffdddd';
-            }
-        }, 500);
-    });
-</script>
-
-    
+        });
+    </script>
 </body>
 </html>
