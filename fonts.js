@@ -2,8 +2,11 @@ export async function loadFont() {
     // Если шрифт уже загружен, ничего не делаем
     if (window.DejaVuSansLoaded) return;
 
-    // Ждём готовности jsPDF
-    await waitForJsPDF();
+    // Проверяем, что jsPDF загружен
+    if (!window.jspdf || !window.jspdf.API) {
+        console.warn('jsPDF ещё не загружен, пропускаем загрузку шрифта');
+        return;
+    }
 
     try {
         // Загрузка шрифта DejaVuSans
@@ -18,28 +21,4 @@ export async function loadFont() {
     } catch (error) {
         console.warn('⚠ Шрифт DejaVuSans не загружен, используется стандартный:', error.message);
     }
-}
-
-// Функция ожидания загрузки jsPDF
-function waitForJsPDF() {
-    return new Promise((resolve, reject) => {
-        if (window.jspdf) {
-            resolve();
-            return;
-        }
-
-        let attempts = 0;
-        const maxAttempts = 100; // 10 секунд при проверке каждые 100 мс
-
-        const checkInterval = setInterval(() => {
-            if (window.jspdf) {
-                clearInterval(checkInterval);
-                resolve();
-            } else if (++attempts >= maxAttempts) {
-                clearInterval(checkInterval);
-                console.error('✗ jsPDF не загрузился в течение 10 секунд, продолжаем без шрифта');
-                resolve(); // Продолжаем работу без шрифта
-            }
-        }, 100);
-    });
 }
