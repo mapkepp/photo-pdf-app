@@ -54,7 +54,7 @@
     <div id="pdf-status">Ожидание загрузки библиотек...</div>
     <a id="download-link" class="hidden" download="photos.pdf">Скачать PDF</a>
 
-    <!-- Подключаем jsPDF -->
+    <!-- Исправленный URL: добавлен 's' в https -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
     <!-- Подключаем модули в правильном порядке -->
@@ -64,4 +64,7 @@
     <script type="module" src="pdf-utils.js"></script>
     <script type="module" src="pdf-page-manager.js"></script>
     <script type="module" src="pdf-photo-renderer.js"></script>
-    <script type="module" src="pdf-generator.js"></script
+    <script type="module" src="pdf-generator.js"></script>
+    <script type="module" src="event-listeners.js"></script>
+</body>
+</html>
