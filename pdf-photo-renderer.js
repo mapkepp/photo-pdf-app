@@ -1,4 +1,5 @@
-// pdf-photo-renderer.js — отрисовка фото и комментариев
+import { checkAndAddNewPage } from './pdf-page-manager.js';
+
 export function renderSinglePhoto(doc, photo, currentY) {
     // Проверка на новую страницу
     let yPosition = checkAndAddNewPage(doc, currentY);
@@ -13,20 +14,3 @@ export function renderSinglePhoto(doc, photo, currentY) {
         const splitComment = doc.splitTextToSize(photo.comment, 180);
 
         splitComment.forEach(line => {
-            doc.text(line, 15, yPosition);
-            yPosition += 8;
-        });
-        yPosition += 5; // Отступ после комментария
-    }
-
-    return yPosition;
-}
-
-// Вспомогательная функция для импорта
-function checkAndAddNewPage(doc, currentY) {
-    if (currentY > 280) {
-        doc.addPage();
-        return 20;
-    }
-    return currentY;
-}
