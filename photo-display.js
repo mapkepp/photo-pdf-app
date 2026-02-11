@@ -1,9 +1,9 @@
+// photo-display.js
 import { updatePhotoOrders } from './photo-utils.js';
 
 export function renderPhotos() {
     const photoContainer = document.getElementById('photo-container');
 
-    // Проверяем существование контейнера
     if (!photoContainer) {
         console.error('Элемент #photo-container не найден в DOM');
         return;
@@ -11,7 +11,6 @@ export function renderPhotos() {
 
     photoContainer.innerHTML = '';
 
-    // Проверяем существование массива фото
     if (!window.photos) {
         window.photos = [];
     }
@@ -33,7 +32,6 @@ export function renderPhotos() {
     `;
             photoContainer.appendChild(photoDiv);
 
-            // Обновляем комментарии при вводе
             const textarea = photoDiv.querySelector('textarea');
             if (textarea) {
                 textarea.addEventListener('input', function() {
@@ -45,11 +43,10 @@ export function renderPhotos() {
     }
 });
 
-    updatePhotoOrders(); // Вызываем функцию для обновления порядков
+    updatePhotoOrders();
 }
 
 window.movePhoto = function(id, direction) {
-    // Проверяем существование массива фото
     if (!window.photos) {
         window.photos = [];
         return;
@@ -59,14 +56,12 @@ window.movePhoto = function(id, direction) {
     const newIndex = index + direction;
 
     if (newIndex >= 0 && newIndex < window.photos.length) {
-        // Меняем местами элементы в массиве
         [window.photos[index], window.photos[newIndex]] = [window.photos[newIndex], window.photos[index]];
         renderPhotos();
     }
 };
 
 window.removePhoto = function(id) {
-    // Проверяем существование массива фото
     if (!window.photos) {
         window.photos = [];
         return;
