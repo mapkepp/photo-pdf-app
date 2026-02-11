@@ -38,7 +38,6 @@ export async function generatePdf(elements) {
         });
         yPosition += 5;
     }
-}
 
         const pdfBlob = doc.output('blob');
         const url = URL.createObjectURL(pdfBlob);
@@ -46,5 +45,6 @@ export async function generatePdf(elements) {
         elements.downloadLink.classList.remove('hidden');
     } catch (error) {
         console.error('Ошибка при генерации PDF:', error);
+        alert('Произошла ошибка при создании PDF. Проверьте консоль для деталей.');
     }
 }
