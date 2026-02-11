@@ -2,7 +2,19 @@ import { updatePhotoOrders } from './photo-utils.js';
 
 export function renderPhotos() {
     const photoContainer = document.getElementById('photo-container');
+
+    // Проверяем существование контейнера
+    if (!photoContainer) {
+        console.error('Элемент #photo-container не найден в DOM');
+        return;
+    }
+
     photoContainer.innerHTML = '';
+
+    // Проверяем существование массива фото
+    if (!window.photos) {
+        window.photos = [];
+    }
 
     window.photos
         .sort((a, b) => a.order - b.order)
@@ -23,18 +35,26 @@ export function renderPhotos() {
 
             // Обновляем комментарии при вводе
             const textarea = photoDiv.querySelector('textarea');
-            textarea.addEventListener('input', function() {
-                const photoId = this.getAttribute('data-id');
-                const comment = this.value;
-                const photo = window.photos.find(p => p.id == photoId);
-                if (photo) photo.comment = comment;
-            });
+            if (textarea) {
+                textarea.addEventListener('input', function() {
+                    const photoId = this.getAttribute('data-id');
+            const comment = this.value;
+            const photo = window.photos.find(p => p.id == photoId);
+            if (photo) photo.comment = comment;
         });
+    }
+});
 
-    updatePhotoOrders();
+    updatePhotoOrders(); // Вызываем функцию для обновления порядков
 }
 
 window.movePhoto = function(id, direction) {
+    // Проверяем существование массива фото
+    if (!window.photos) {
+        window.photos = [];
+        return;
+    }
+
     const index = window.photos.findIndex(p => p.id === id);
     const newIndex = index + direction;
 
@@ -46,6 +66,12 @@ window.movePhoto = function(id, direction) {
 };
 
 window.removePhoto = function(id) {
+    // Проверяем существование массива фото
+    if (!window.photos) {
+        window.photos = [];
+        return;
+    }
+
     window.photos = window.photos.filter(p => p.id !== id);
     renderPhotos();
 };
