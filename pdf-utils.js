@@ -8,7 +8,7 @@ export function createPdfDocument() {
     // ОБЯЗАТЕЛЬНАЯ проверка доступности DejaVuSans перед использованием
     const availableFonts = doc.getFontList();
     const hasDejaVu = availableFonts['dejavusans'] ||
-                       availableFonts['DejaVuSans'] ||
+               availableFonts['DejaVuSans'] ||
                availableFonts['dejavusans,normal'] ||
                availableFonts['DejaVuSans,normal'];
 
