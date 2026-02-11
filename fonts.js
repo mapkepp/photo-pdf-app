@@ -10,7 +10,7 @@ export async function loadFont() {
 
     try {
         // Загрузка шрифта DejaVuSans
-        const fontUrl = 'DejaVuSans.ttf';
+        const fontUrl = './DejaVuSans.ttf';
         const response = await fetch(fontUrl);
         const buffer = await response.arrayBuffer();
 
