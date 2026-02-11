@@ -3,6 +3,7 @@ export async function loadFont() {
 
     await waitForJsPDF();
 
+
     try {
         const fontUrl = './DejaVuSans.ttf';
         const response = await fetch(fontUrl);
@@ -11,25 +12,16 @@ export async function loadFont() {
         }
 
         const buffer = await response.arrayBuffer();
+        // Конвертируем в Base64 без дополнительных заголовков
         const base64Font = arrayBufferToBase64(buffer);
 
-        // Создаём временный документ для регистрации шрифта
-        const tempDoc = new window.jspdf.jsPDF();
+        const doc = new window.jspdf.jsPDF();
 
-        // Добавляем шрифт в виртуальную файловую систему
-        tempDoc.addFileToVFS('DejaVuSans.ttf', base64Font);
+        // Добавляем шрифт в vFS с корректным именем
+        doc.addFileToVFS('DejaVuSans.ttf', base64Font);
 
-        // Регистрируем шрифт (используем addFont, если доступен)
-        if (typeof tempDoc.addFont === 'function') {
-            tempDoc.addFont(base64Font, 'DejaVuSans', 'normal');
-        } else {
-            // Альтернативный способ через API (если addFont отсутствует)
-            if (window.jspdf && window.jspdf.API && typeof window.jspdf.API.addFont === 'function') {
-                window.jspdf.API.addFont(base64Font, 'DejaVuSans', 'normal');
-            } else {
-                throw new Error('Ни один из методов добавления шрифта (addFont/API.addFont) не доступен');
-            }
-        }
+        // Регистрируем шрифт — указываем имя и стиль
+        doc.addFont('DejaVuSans.ttf', 'DejaVuSans', 'normal');
 
         window.DejaVuSansLoaded = true;
         console.log('✓ Шрифт DejaVuSans успешно загружен и зарегистрирован');
