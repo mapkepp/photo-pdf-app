@@ -1,14 +1,16 @@
 export async function loadFont() {
-    if (window.DejaVuSansLoaded) return;
+    if (window.DejaVuSansLoaded) {
+        console.log('🔁 Шрифт DejaVuSans уже загружен, пропускаем загрузку');
+        return;
+    }
 
     await waitForJsPDF();
 
     try {
-        // Формируем корректный путь для GitHub Pages
+        // Формируем путь для GitHub Pages
         const basePath = window.location.pathname.includes('/index.html')
             ? window.location.pathname.replace('/index.html', '')
             : window.location.pathname;
-
         const fontUrl = `${basePath}/DejaVuSans.ttf`.replace(/\/\/+/g, '/');
 
         console.log('🔎 Попытка загрузки шрифта:', fontUrl);
@@ -27,14 +29,30 @@ export async function loadFont() {
         const buffer = await response.arrayBuffer();
         const base64Font = arrayBufferToBase64(buffer);
 
-        const doc = new window.jspdf.jsPDF();
-        doc.addFileToVFS('DejaVuSans.ttf', base64Font);
-        doc.addFont('DejaVuSans.ttf', 'DejaVuSans', 'normal');
+        // Создаём временный документ для регистрации
+        const tempDoc = new window.jspdf.jsPDF();
+
+        // Добавляем в vFS
+        tempDoc.addFileToVFS('DejaVuSans.ttf', base64Font);
+
+        // Регистрируем шрифт
+        tempDoc.addFont('DejaVuSans.ttf', 'DejaVuSans', 'normal');
+
+        // Проверяем регистрацию
+        const availableFonts = tempDoc.getFontList();
+        const hasDejaVu = Object.keys(availableFonts).some(fontName =>
+            fontName.toLowerCase().includes('dejavusans')
+        );
+
+        if (!hasDejaVu) {
+            console.error('❌ Шрифт не зарегистрирован в tempDoc');
+            throw new Error('Шрифт DejaVuSans не зарегистрирован в системе шрифтов jsPDF');
+        }
 
         window.DejaVuSansLoaded = true;
         console.log('✓ Шрифт DejaVuSans успешно загружен и зарегистрирован');
     } catch (error) {
-        console.error('❌ Критическая ошибка: шрифт DejaVuSans не загружен:', error.message);
+        console.error('❌ Критическая ошибка загрузки шрифта:', error.message);
         throw error;
     }
 }
