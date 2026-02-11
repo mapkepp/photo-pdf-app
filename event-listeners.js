@@ -65,4 +65,9 @@ function handlePhotoUpload(e) {
             localStorage.setItem('photos', JSON.stringify(window.photos));
         };
         reader.onerror = () => console.error('Ошибка чтения файла:', file.name);
-        reader
+        reader.readAsDataURL(file);
+    });
+}
+
+// Инициализация при загрузке страницы
+document.addEventListener('DOMContentLoaded', initEventListeners);
