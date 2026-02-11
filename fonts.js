@@ -1,4 +1,20 @@
-export async function loadFont() {
+export async function loadFont() 
+export async function debugFontLoading() {
+    console.log('=== ДИАГНОСТИКА ЗАГРУЗКИ ШРИФТА===');
+    console.log('jsPDF доступен:', !!window.jspdf);
+    console.log('API доступен:', !!(window.jspdf && window.jspdf.API));
+
+    try {
+        const response = await fetch('./DejaVuSans.ttf');
+        console.log('Файл шрифта доступен:', response.ok);
+    } catch (e) {
+        console.log('Ошибка доступа к файлу шрифта:', e.message);
+    }
+}
+// Вызовите один раз для диагностики:
+// debugFontLoading();
+
+{
     // Если шрифт уже загружен, ничего не делаем
     if (window.DejaVuSansLoaded) return;
 
