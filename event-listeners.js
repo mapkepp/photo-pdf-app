@@ -8,33 +8,45 @@ export function initEventListeners() {
     const generatePdfBtn = document.getElementById('generate-pdf');
     const downloadLink = document.getElementById('download-link');
 
-    // Восстановление состояния из localStorage при загрузке
+    // Восстановление состояния
     const savedPhotos = localStorage.getItem('photos');
     if (savedPhotos) {
-        window.photos = JSON.parse(savedPhotos);
-        renderPhotos();
+        try {
+            window.photos = JSON.parse(savedPhotos);
+            renderPhotos();
+        } catch (e) {
+            console.error('Ошибка восстановления данных:', e);
+            window.photos = [];
+        }
     }
 
-    // Обработчик загрузки фото
     uploadInput.addEventListener('change', handlePhotoUpload);
-
-    // Обработчик генерации PDF
     generatePdfBtn.addEventListener('click', async () => {
-        await generatePdf({
-            photoContainer,
-            titleInput,
-            downloadLink
-        });
+        await generatePdf({ photoContainer, titleInput, downloadLink });
     });
 }
 
 function handlePhotoUpload(e) {
-    // Очистка перед загрузкой новых фото
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    // Очистка перед загрузкой
     window.photos = [];
 
-    const files = e.target.files;
-
     Array.from(files).forEach(file => {
+        // Валидация формата
+        const validTypes = ['image/jpeg', 'image/png', 'image/webp'];
+        if (!validTypes.includes(file.type)) {
+            alert(`Файл ${file.name} не поддерживается. Используйте JPG, PNG или WebP.`);
+            return;
+        }
+
+        // Проверка размера (< 10 МБ)
+        if (file.size > 10 * 1024 * 1024) {
+            alert(`Файл ${file.name} слишком большой (>${10} МБ).`);
+            return;
+        }
+
         const reader = new FileReader();
         reader.onload = function(e) {
             const photo = {
@@ -44,12 +56,12 @@ function handlePhotoUpload(e) {
                 order: window.photos.length
             };
             window.photos.push(photo);
-            renderPhotos(); // Теперь функция доступна
+            renderPhotos();
             localStorage.setItem('photos', JSON.stringify(window.photos));
         };
+        reader.onerror = () => console.error('Ошибка чтения файла:', file.name);
         reader.readAsDataURL(file);
     });
 }
 
-// Инициализация при загрузке страницы
 document.addEventListener('DOMContentLoaded', initEventListeners);
