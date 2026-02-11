@@ -1,7 +1,11 @@
-export function renderPhotoWithComment(doc, photo, currentY) {
+// pdf-photo-renderer.js — отрисовка фото и комментариев
+export function renderSinglePhoto(doc, photo, currentY) {
+    // Проверка на новую страницу
+    let yPosition = checkAndAddNewPage(doc, currentY);
+
     // Отрисовка фото
-    doc.addImage(photo.src, 'JPEG', 10, currentY, 190, 120);
-    let newY = currentY + 130;
+    doc.addImage(photo.src, 'JPEG', 10, yPosition, 190, 120);
+    yPosition += 130;
 
     // Отрисовка комментария, если есть
     if (photo.comment) {
@@ -9,10 +13,20 @@ export function renderPhotoWithComment(doc, photo, currentY) {
         const splitComment = doc.splitTextToSize(photo.comment, 180);
 
         splitComment.forEach(line => {
-            doc.text(line, 15, newY);
-            newY += 8;
+            doc.text(line, 15, yPosition);
+            yPosition += 8;
         });
-        newY += 5; // Отступ после комментария
+        yPosition += 5; // Отступ после комментария
     }
 
-    return newY;
+    return yPosition;
+}
+
+// Вспомогательная функция для импорта
+function checkAndAddNewPage(doc, currentY) {
+    if (currentY > 280) {
+        doc.addPage();
+        return 20;
+    }
+    return currentY;
+}
