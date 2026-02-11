@@ -17,21 +17,16 @@ export async function loadFont() {
         // Конвертация ArrayBuffer в Base64
         const base64Font = arrayBufferToBase64(buffer);
 
-        // Поиск корректного метода регистрации шрифта
-        const jsPDF = window.jspdf;
+        const doc = new window.jspdf.jsPDF();
 
-        if (jsPDF && jsPDF.API && typeof jsPDF.API.addFont === 'function') {
-            // Основной способ (для современных версий)
-            jsPDF.API.addFont(base64Font, 'DejaVuSans', 'normal');
-        } else if (typeof window.jsPDF === 'function') {
-            // Альтернативный способ — используем глобальную функцию jsPDF
-            window.jsPDF.API.addFont(base64Font, 'DejaVuSans', 'normal');
-        } else {
-            throw new Error('Метод addFont недоступен в текущей версии jsPDF');
-        }
+        // Добавляем шрифт в виртуальную файловую систему (vFS)
+        doc.addFileToVFS('DejaVuSans.ttf', base64Font);
+
+        // Загружаем шрифт из vFS
+        doc.loadFont('DejaVuSans.ttf', 'DejaVuSans', 'normal');
 
         window.DejaVuSansLoaded = true;
-        console.log('✓ Шрифт DejaVuSans успешно загружен и зарегистрирован (Base64)');
+        console.log('✓ Шрифт DejaVuSans успешно загружен и зарегистрирован через vFS');
     } catch (error) {
         console.error('❌ Критическая ошибка: шрифт DejaVuSans не загружен:', error.message);
         throw error;
