@@ -40,11 +40,3 @@ export async function generatePdf(elements) {
     }
 
         const pdfBlob = doc.output('blob');
-        const url = URL.createObjectURL(pdfBlob);
-        elements.downloadLink.href = url;
-        elements.downloadLink.classList.remove('hidden');
-    } catch (error) {
-        console.error('Ошибка при генерации PDF:', error);
-        alert('Произошла ошибка при создании PDF. Проверьте консоль для деталей.');
-    }
-}
