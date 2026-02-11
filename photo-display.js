@@ -14,7 +14,7 @@ export function renderPhotos() {
                 <textarea placeholder="Комментарий к фото" data-id="${photo.id}">${photo.comment}</textarea>
                 <div class="controls">
                     <button onclick="movePhoto(${photo.id}, -1)">←</button>
-            <span>Позиция: ${index + 1}</span>
+                    <span>Позиция: ${index + 1}</span>
             <button onclick="movePhoto(${photo.id}, 1)">→</button>
             <button onclick="removePhoto(${photo.id})">Удалить</button>
         </div>
@@ -37,9 +37,10 @@ export function renderPhotos() {
 window.movePhoto = function(id, direction) {
     const index = window.photos.findIndex(p => p.id === id);
     const newIndex = index + direction;
+
     if (newIndex >= 0 && newIndex < window.photos.length) {
-        [window.photos[index], window.photos[newIndex]] =
-            [window.photos[newIndex], window.photos[index]];
+        // Меняем местами элементы в массиве
+        [window.photos[index], window.photos[newIndex]] = [window.photos[newIndex], window.photos[index]];
         renderPhotos();
     }
 };
