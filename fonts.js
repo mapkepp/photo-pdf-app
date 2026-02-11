@@ -49,3 +49,20 @@ function waitForJsPDF() {
     return new Promise((resolve, reject) => {
         if (window.jspdf) {
             resolve();
+            return;
+        }
+
+        let attempts = 0;
+        const maxAttempts = 100;
+
+        const checkInterval = setInterval(() => {
+            if (window.jspdf) {
+                clearInterval(checkInterval);
+                resolve();
+            } else if (++attempts >= maxAttempts) {
+                clearInterval(checkInterval);
+                reject(new Error('jsPDF не загрузился в течение 10 секунд'));
+            }
+        }, 100);
+    });
+}
