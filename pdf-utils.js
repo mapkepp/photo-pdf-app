@@ -98,6 +98,10 @@ export function savePdfDocument(doc, downloadLink) {
         downloadLink.download = 'document.pdf';
         console.log('✓ Свойство download установлено');
 
+        // Показываем ссылку для скачивания
+        downloadLink.classList.remove('hidden');
+        console.log('✓ Ссылка для скачивания показана (удалён класс hidden)');
+
         // Имитируем клик
         downloadLink.click();
         console.log('✓ Выполнен клик по элементу скачивания');
