@@ -35,7 +35,7 @@ export async function loadFont() {
         // Добавляем в vFS
         tempDoc.addFileToVFS('DejaVuSans.ttf', base64Font);
 
-        // Регистрируем шрифт
+        // Регистрируем шрифт с явным указанием параметров
         tempDoc.addFont('DejaVuSans.ttf', 'DejaVuSans', 'normal');
 
         // Проверяем регистрацию
