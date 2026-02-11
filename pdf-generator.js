@@ -35,15 +35,15 @@ export async function generatePdf(elements) {
             }
             doc.text(line, 15, yPosition);
             yPosition += 8;
-        });
+        }); // ЗАКРЫТИЕ forEach — закрывает обработку строки комментария
         yPosition += 5;
-    }
+    } // ЗАКРЫТИЕ for — закрывает цикл по фотографиям
 
         const pdfBlob = doc.output('blob');
         const url = URL.createObjectURL(pdfBlob);
         elements.downloadLink.href = url;
         elements.downloadLink.classList.remove('hidden');
-    } catch (error) {
+    } catch (error) { // ЗАКРЫТИЕ try — корректно завершает блок try перед catch
         console.error('Ошибка при генерации PDF:', error);
         alert('Произошла ошибка при создании PDF. Проверьте консоль для деталей.');
     }
