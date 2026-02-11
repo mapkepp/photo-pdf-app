@@ -14,30 +14,27 @@ export async function loadFont() {
         }
         const buffer = await response.arrayBuffer();
 
-        // Проверяем доступность методов addFont в разных версиях jsPDF
-        const jsPDF = window.jspdf;
+        // Конвертация ArrayBuffer в Base64 строку
+        const base64Font = arrayBufferToBase64(buffer);
 
-        if (jsPDF && jsPDF.API && typeof jsPDF.API.addFont === 'function') {
-            // Основной способ (для современных версий)
-            jsPDF.API.addFont(buffer, 'DejaVuSans', 'normal');
-        } else if (jsPDF && typeof jsPDF.jsPDF === 'function') {
-            // Альтернативный способ — создаём временный документ для регистрации шрифта
-            const tempDoc = new jsPDF.jsPDF();
-            if (typeof tempDoc.addFont === 'function') {
-                tempDoc.addFont(buffer, 'DejaVuSans', 'normal');
-            } else {
-                throw new Error('Метод addFont недоступен в текущей версии jsPDF');
-            }
-        } else {
-            throw new Error('jsPDF не инициализирован корректно или API недоступно');
-        }
-
+        // Регистрация шрифта в jsPDF (в формате Base64)
+        window.jspdf.API.addFont(base64Font, 'DejaVuSans', 'normal');
         window.DejaVuSansLoaded = true;
-        console.log('✓ Шрифт DejaVuSans успешно загружен и зарегистрирован');
+        console.log('✓ Шрифт DejaVuSans успешно загружен и зарегистрирован (Base64)');
     } catch (error) {
         console.error('❌ Критическая ошибка: шрифт DejaVuSans не загружен:', error.message);
         throw error;
     }
+}
+
+// Функция конвертации ArrayBuffer в Base64
+function arrayBufferToBase64(buffer) {
+    const bytes = new Uint8Array(buffer);
+    let binary = '';
+    for (let i = 0; i < bytes.byteLength; i++) {
+        binary += String.fromCharCode(bytes[i]);
+    }
+    return btoa(binary);
 }
 
 // Функция ожидания загрузки jsPDF с проверкой структуры
