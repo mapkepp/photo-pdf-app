@@ -21,7 +21,6 @@ export function createPdfDocument() {
     doc.setFont('DejaVuSans');
     console.log('✓ Используется шрифт DejaVuSans (кириллица гарантирована)');
 
-
     return doc;
 }
 
