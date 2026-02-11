@@ -4,6 +4,9 @@ import { renderSinglePhoto } from './pdf-photo-renderer.js';
 
 export async function generatePdf(elements) {
     try {
+        // Сначала ждём загрузки jsPDF
+        await waitForJsPDFReady();
+
         await loadFont();
 
         // Проверяем, что jsPDF доступен
@@ -38,7 +41,30 @@ export async function generatePdf(elements) {
         savePdfDocument(doc, elements.downloadLink);
 
     } catch (error) {
-        console.error('Ошибка при генерации PDF:', error);
+        console.error('❌ Ошибка при генерации PDF:', error);
         alert('Произошла ошибка при создании PDF. Проверьте консоль для деталей.');
     }
+}
+
+// Дополнительная функция ожидания jsPDF
+async function waitForJsPDFReady() {
+    return new Promise((resolve) => {
+        if (window.jspdf) {
+            resolve();
+            return;
+        }
+
+        let attempts = 0;
+        const maxAttempts = 100;
+
+        const checkInterval = setInterval(() => {
+            if (window.jspdf) {
+                clearInterval(checkInterval);
+                resolve();
+            } else if (++attempts >= maxAttempts) {
+                clearInterval(checkInterval);
+                throw new Error('jsPDF не загрузился в течение 10 секунд');
+            }
+        }, 100);
+    });
 }
