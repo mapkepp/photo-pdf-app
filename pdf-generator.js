@@ -6,6 +6,11 @@ export async function generatePdf(elements) {
     try {
         await loadFont();
 
+        // Проверяем, что jsPDF доступен
+        if (!window.jspdf) {
+            throw new Error('Библиотека jsPDF не загружена');
+        }
+
         // Создаём документ
         const doc = createPdfDocument();
 
