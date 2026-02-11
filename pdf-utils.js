@@ -23,11 +23,13 @@ export function createPdfDocument() {
 
     if (!fontFound) {
         console.warn('⚠️ Доступные шрифты:', Object.keys(availableFonts));
-        throw new Error('Шрифт DejaVuSans не зарегистрирован. Невозможно создать PDF с кириллицей');
+        // Резервный вариант: используем стандартный шрифт, если DejaVu не найден
+        console.warn('⚠️ Шрифт DejaVuSans не найден, используем стандартный шрифт');
+        doc.setFont('Helvetica');
+    } else {
+        doc.setFont(matchingFontName);
+        console.log(`✓ Используется шрифт ${matchingFontName} (кириллица гарантирована)`);
     }
-
-    doc.setFont(matchingFontName);
-    console.log(`✓ Используется шрифт ${matchingFontName} (кириллица гарантирована)`);
 
     return doc;
 }
