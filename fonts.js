@@ -14,11 +14,22 @@ export async function loadFont() {
         }
         const buffer = await response.arrayBuffer();
 
-        // Конвертация ArrayBuffer в Base64 строку
+        // Конвертация ArrayBuffer в Base64
         const base64Font = arrayBufferToBase64(buffer);
 
-        // Регистрация шрифта в jsPDF (в формате Base64)
-        window.jspdf.API.addFont(base64Font, 'DejaVuSans', 'normal');
+        // Поиск корректного метода регистрации шрифта
+        const jsPDF = window.jspdf;
+
+        if (jsPDF && jsPDF.API && typeof jsPDF.API.addFont === 'function') {
+            // Основной способ (для современных версий)
+            jsPDF.API.addFont(base64Font, 'DejaVuSans', 'normal');
+        } else if (typeof window.jsPDF === 'function') {
+            // Альтернативный способ — используем глобальную функцию jsPDF
+            window.jsPDF.API.addFont(base64Font, 'DejaVuSans', 'normal');
+        } else {
+            throw new Error('Метод addFont недоступен в текущей версии jsPDF');
+        }
+
         window.DejaVuSansLoaded = true;
         console.log('✓ Шрифт DejaVuSans успешно загружен и зарегистрирован (Base64)');
     } catch (error) {
