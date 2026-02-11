@@ -14,3 +14,11 @@ export function renderSinglePhoto(doc, photo, currentY) {
         const splitComment = doc.splitTextToSize(photo.comment, 180);
 
         splitComment.forEach(line => {
+            doc.text(line, 15, yPosition);
+            yPosition += 8;
+        });
+        yPosition += 5; // Отступ после комментария
+    }
+
+    return yPosition;
+}
