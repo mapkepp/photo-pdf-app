@@ -7,6 +7,27 @@ if (!window.photos) {
     renderPhotos();
 }
 
+// Функция для проверки готовности jsPDF
+function checkJsPDFReady() {
+    return !!window.jspdf;
+}
+
+// Обновляем состояние кнопки генерации PDF
+function updateGeneratePdfButton() {
+    const generateBtn = document.getElementById('generate-pdf');
+    const status = document.getElementById('pdf-status');
+
+    if (checkJsPDFReady()) {
+        generateBtn.disabled = false;
+        status.textContent = 'Готов к созданию PDF';
+        status.style.color = 'green';
+    } else {
+        generateBtn.disabled = true;
+        status.textContent = 'Ожидание загрузки библиотек...';
+        status.style.color = 'orange';
+    }
+}
+
 // Обработчик загрузки фото
 document.getElementById('photo-upload').addEventListener('change', function(e) {
     const files = e.target.files;
@@ -29,9 +50,20 @@ document.getElementById('photo-upload').addEventListener('change', function(e) {
 
 // Обработчик генерации PDF
 document.getElementById('generate-pdf').addEventListener('click', function() {
+    if (!checkJsPDFReady()) {
+        alert('Библиотека jsPDF ещё загружается. Подождите несколько секунд.');
+        return;
+    }
+
     const elements = {
         titleInput: document.getElementById('title'),
         downloadLink: document.getElementById('download-link')
     };
     generatePdf(elements);
 });
+
+// Периодическая проверка готовности jsPDF (каждые 200 мс)
+setInterval(updateGeneratePdfButton, 200);
+
+// Первоначальный вызов
+updateGeneratePdfButton();
