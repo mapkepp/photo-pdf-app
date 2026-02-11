@@ -1,11 +1,8 @@
-export function addNewPageIfNeeded(doc, currentY) {
+// pdf-page-manager.js — управление страницами
+export function checkAndAddNewPage(doc, currentY) {
     if (currentY > 280) {
         doc.addPage();
-        return doc;
+        return 20; // новая позиция Y на новой странице
     }
-    return doc;
-}
-
-export function initializePage() {
-    return 20; // Начальная позиция Y на новой странице
+    return currentY;
 }
