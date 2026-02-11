@@ -8,7 +8,7 @@ export function initEventListeners() {
     const generatePdfBtn = document.getElementById('generate-pdf');
     const downloadLink = document.getElementById('download-link');
 
-    // Восстановление состояния
+    // Восстановление состояния из localStorage при загрузке
     const savedPhotos = localStorage.getItem('photos');
     if (savedPhotos) {
         try {
@@ -21,8 +21,13 @@ export function initEventListeners() {
     }
 
     uploadInput.addEventListener('change', handlePhotoUpload);
+
     generatePdfBtn.addEventListener('click', async () => {
-        await generatePdf({ photoContainer, titleInput, downloadLink });
+        await generatePdf({
+            photoContainer,
+            titleInput,
+            downloadLink
+        });
     });
 }
 
@@ -30,7 +35,7 @@ function handlePhotoUpload(e) {
     const files = e.target.files;
     if (!files || files.length === 0) return;
 
-    // Очистка перед загрузкой
+    // Очистка перед загрузкой новых фото
     window.photos = [];
 
     Array.from(files).forEach(file => {
@@ -60,8 +65,4 @@ function handlePhotoUpload(e) {
             localStorage.setItem('photos', JSON.stringify(window.photos));
         };
         reader.onerror = () => console.error('Ошибка чтения файла:', file.name);
-        reader.readAsDataURL(file);
-    });
-}
-
-document.addEventListener('DOMContentLoaded', initEventListeners);
+        reader
