@@ -3,24 +3,29 @@ export async function loadFont() {
 
     await waitForJsPDF();
 
-
     try {
         const fontUrl = './DejaVuSans.ttf';
+
+        // Проверка доступности файла перед загрузкой
+        const checkResponse = await fetch(fontUrl, { method: 'HEAD' });
+        if (!checkResponse.ok) {
+            throw new Error(`Файл шрифта не найден: ${fontUrl}`);
+        }
+
         const response = await fetch(fontUrl);
         if (!response.ok) {
             throw new Error(`Ошибка загрузки шрифта: ${response.status} ${response.statusText}`);
         }
 
         const buffer = await response.arrayBuffer();
-        // Конвертируем в Base64 без дополнительных заголовков
         const base64Font = arrayBufferToBase64(buffer);
 
         const doc = new window.jspdf.jsPDF();
 
-        // Добавляем шрифт в vFS с корректным именем
+        // Добавляем шрифт в виртуальную файловую систему
         doc.addFileToVFS('DejaVuSans.ttf', base64Font);
 
-        // Регистрируем шрифт — указываем имя и стиль
+        // Регистрируем шрифт с указанием имени и стиля
         doc.addFont('DejaVuSans.ttf', 'DejaVuSans', 'normal');
 
         window.DejaVuSansLoaded = true;
@@ -44,20 +49,3 @@ function waitForJsPDF() {
     return new Promise((resolve, reject) => {
         if (window.jspdf) {
             resolve();
-            return;
-        }
-
-        let attempts = 0;
-        const maxAttempts = 100;
-
-        const checkInterval = setInterval(() => {
-            if (window.jspdf) {
-                clearInterval(checkInterval);
-                resolve();
-            } else if (++attempts >= maxAttempts) {
-                clearInterval(checkInterval);
-                reject(new Error('jsPDF не загрузился в течение 10 секунд'));
-            }
-        }, 100);
-    });
-}
