@@ -1,7 +1,7 @@
 export function setupPhotoPreview() {
     const uploadInput = document.getElementById('photo-upload');
     const previewContainer = document.getElementById('photo-preview');
-    const maxPreviewSize = 150; // Максимальный размер превью в пикселях
+    const statusElement = document.getElementById('pdf-status');
 
     if (!uploadInput || !previewContainer) {
         console.error('❌ Элементы для загрузки/предпросмотра фото не найдены в DOM');
@@ -11,10 +11,12 @@ export function setupPhotoPreview() {
     uploadInput.addEventListener('change', function(event) {
         const files = event.target.files;
 
-        // Очищаем контейнер предпросмотра
+        // Очищаем контейнер предпросмотра и статус
         previewContainer.innerHTML = '';
+        clearStatus();
 
         if (files.length === 0) {
+            showStatus('Нет выбранных файлов для предпросмотра', 'info');
             console.log('🔎 Нет выбранных файлов для предпросмотра');
             return;
         }
@@ -28,6 +30,7 @@ export function setupPhotoPreview() {
         Array.from(files).forEach((file, index) => {
             if (!file.type.match('image.*')) {
                 console.warn(`⚠️ Файл ${file.name} не является изображением, пропускаем`);
+                showStatus(`Файл ${file.name} не является изображением`, 'error');
                 return;
             }
 
@@ -64,9 +67,10 @@ export function setupPhotoPreview() {
                 errorContainer.className = 'photo-preview-item error';
                 errorContainer.innerHTML = `
                     <div class="error-icon">❌</div>
-                    <div class="preview-caption">Ошибка загрузки: ${file.name}</div>
+            <div class="preview-caption">Ошибка загрузки: ${file.name}</div>
                 `;
                 previewContainer.appendChild(errorContainer);
+                showStatus(`Ошибка при загрузке файла: ${file.name}`, 'error');
             };
 
             // Читаем файл как Data URL для отображения
@@ -80,6 +84,9 @@ export function setupPhotoPreview() {
             generateButton.classList.remove('disabled');
             console.log('✓ Кнопка "Создать PDF" активирована');
         }
+
+        // Обновляем статус
+        showStatus(`Загружено ${files.length} фото(ов). Готов к созданию PDF.`, 'success');
     });
 
     // Добавляем обработчик для очистки предпросмотра при повторном выборе файлов
@@ -104,4 +111,31 @@ function formatFileSize(bytes) {
     const i = Math.floor(Math.log(bytes) / Math.log(k));
 
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+}
+
+// Функция для отображения статуса
+function showStatus(message, type) {
+    if (!statusElement) return;
+
+    statusElement.textContent = message;
+    statusElement.className = 'status-message';
+
+    switch (type) {
+        case 'success':
+            statusElement.classList.add('status-success');
+            break;
+        case 'error':
+            statusElement.classList.add('status-error');
+            break;
+        default:
+            statusElement.style.background = '#fff3cd';
+            statusElement.style.color = '#856404';
+    }
+}
+
+// Функция для очистки статуса
+function clearStatus() {
+    if (!statusElement) return;
+    statusElement.textContent = '';
+    statusElement.className = 'status-message';
 }
