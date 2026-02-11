@@ -61,24 +61,24 @@ export function renderPhotos() {
                 const targetPhoto = window.photos.find(p => p.id == photoId);
                 if (targetPhoto) {
                     targetPhoto.comment = comment;
-                    localStorage.setItem('photos', JSON.stringify(window.photos));
-                }
-            });
+            localStorage.setItem('photos', JSON.stringify(window.photos));
+        }
+    });
 
-            const controls = document.createElement('div');
-            controls.className = 'controls';
-            controls.innerHTML = `
-                <button onclick="movePhoto(${photo.id}, -1)">←</button>
-                <span>Позиция: ${index + 1}</span>
-                <button onclick="movePhoto(${photo.id}, 1)">→</button>
-                <button onclick="removePhoto(${photo.id})">Удалить</button>
-            `;
+    const controls = document.createElement('div');
+    controls.className = 'controls';
+    controls.innerHTML = `
+        <button onclick="movePhoto(${photo.id}, -1)">←</button>
+        <span>Позиция: ${index + 1}</span>
+        <button onclick="movePhoto(${photo.id}, 1)">→</button>
+        <button onclick="removePhoto(${photo.id})">Удалить</button>
+    `;
 
-            photoDiv.appendChild(img);
-            photoDiv.appendChild(textarea);
-            photoDiv.appendChild(controls);
-            photoContainer.appendChild(photoDiv);
-        });
+    photoDiv.appendChild(img);
+    photoDiv.appendChild(textarea);
+    photoDiv.appendChild(controls);
+    photoContainer.appendChild(photoDiv);
+});
 
-    updatePhotoOrders();
+updatePhotoOrders();
 }
