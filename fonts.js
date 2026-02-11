@@ -14,22 +14,22 @@ export async function loadFont() {
         // Регистрация шрифта в jsPDF
         window.jspdf.API.addFont(buffer, 'DejaVuSans', 'normal');
         window.DejaVuSansLoaded = true;
-        console.log('Шрифт DejaVuSans успешно загружен и зарегистрирован');
+        console.log('✓ Шрифт DejaVuSans успешно загружен и зарегистрирован');
     } catch (error) {
-        console.warn('Шрифт DejaVuSans не загружен, используется стандартный:', error);
+        console.warn('⚠ Шрифт DejaVuSans не загружен, используется стандартный:', error.message);
     }
 }
 
 // Функция ожидания загрузки jsPDF
 function waitForJsPDF() {
-    return new Promise((resolve) => {
+    return new Promise((resolve, reject) => {
         if (window.jspdf) {
             resolve();
             return;
         }
 
         let attempts = 0;
-        const maxAttempts = 50; // 5 секунд при проверке каждые 100 мс
+        const maxAttempts = 100; // 10 секунд при проверке каждые 100 мс
 
         const checkInterval = setInterval(() => {
             if (window.jspdf) {
@@ -37,8 +37,8 @@ function waitForJsPDF() {
                 resolve();
             } else if (++attempts >= maxAttempts) {
                 clearInterval(checkInterval);
-                console.error('jsPDF не загрузился в течение 5 секунд');
-                resolve(); // Продолжаем без шрифта, если jsPDF так и не загрузился
+                console.error('✗ jsPDF не загрузился в течение 10 секунд, продолжаем без шрифта');
+                resolve(); // Продолжаем работу без шрифта
             }
         }, 100);
     });
