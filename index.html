@@ -127,63 +127,35 @@
     <div id="pdf-status">Ожидание загрузки библиотек...</div>
     <a id="download-link" class="hidden" download="photos.pdf">Скачать PDF</a>
 
-    <!-- Локальная копия jsPDF -->
-    <script src="./jspdf.umd.min.js"></script>
+    <!-- Библиотека pdfmake -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
 
-    <!-- Подключаем модули в правильном порядке -->
-    <script type="module" src="fonts.js"></script>
+    <!-- Подключаем оставшиеся модули -->
     <script type="module" src="photo-utils.js"></script>
     <script type="module" src="photo-display.js"></script>
-    <script type="module" src="pdf-utils.js"></script>
-    <script type="module" src="pdf-page-manager.js"></script>
-    <script type="module" src="pdf-photo-renderer.js"></script>
-    <script type="module" src="pdf-generator.js"></script>
+    <script type="module" src="pdfmake-generator.js"></script>
     <script type="module" src="event-listeners.js"></script>
 
     <script>
         // Глобальная переменная для хранения фото
         window.photos = [];
 
-        // Отслеживаем загрузку jsPDF
+        // Отслеживаем загрузку pdfmake
         window.addEventListener('load', function() {
             setTimeout(() => {
                 const status = document.getElementById('pdf-status');
-                if (window.jspdf) {
-                    status.textContent = 'jsPDF загружен, готов к работе';
+                if (window.pdfMake) {
+                    status.textContent = 'pdfmake загружен, готов к работе';
             status.style.color = 'green';
 
             // Дополнительная диагностика
-            console.log('jsPDF объект:', window.jspdf);
-            console.log('Доступен ли addFont:', !!(window.jspdf.jsPDF && window.jspdf.jsPDF.prototype.addFont));
+            console.log('pdfmake объект:', window.pdfMake);
         } else {
-            status.textContent = 'Ошибка: jsPDF не загружен';
+            status.textContent = 'Ошибка: pdfmake не загружен';
             status.style.background = '#ffdddd';
         }
             }, 500);
-        });
-
-        // Обработчик загрузки фото — активирует кнопку после выбора файлов
-        document.getElementById('photo-upload').addEventListener('change', (e) => {
-            const files = e.target.files;
-            const generatePdfButton = document.getElementById('generate-pdf');
-
-            if (files.length > 0) {
-                // Сохраняем файлы в глобальную переменную
-                window.photos = Array.from(files);
-
-                // Активируем кнопку
-                generatePdfButton.disabled = false;
-                console.log(`✓ Загружено ${files.length} фото(ов), кнопка активирована`);
-
-                // Обновляем статус
-                const status = document.getElementById('pdf-status');
-                status.textContent = `Загружено ${files.length} фото(ов). Готов к созданию PDF.`;
-                status.style.color = 'blue';
-            } else {
-                // Если файлов нет, деактивируем кнопку
-                generatePdfButton.disabled = true;
-                console.log('ℹ️ Фото не выбраны, кнопка деактивирована');
-            }
         });
     </script>
 </body>
