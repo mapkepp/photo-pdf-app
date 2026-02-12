@@ -3,51 +3,113 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Фото в PDF конвертер</title>
-    <!-- Фавикон из корневой папки -->
-    <link rel="icon" href="/favicon.ico" type="image/x-icon">
-    <!-- Исправленные пути к CSS и JS -->
-    <link rel="stylesheet" href="./styles.css">
-    <script src="./pdfmake.min.js"></script>
-    <script src="./vfs_fonts.js"></script>
+    <title>Фото в PDF — Конвертер изображений</title>
+    <link rel="icon" href="./favicon.ico" type="image/x-icon">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="photo-preview.css">
+
+    <!-- Подгрузка шрифтов и дополнительных стилей -->
+    <style>
+        @font-face {
+            font-family: 'DejaVu Sans';
+            src: url('./DejaVuSans.ttf') format('truetype');
+        }
+    </style>
 </head>
 <body>
     <div class="container">
-        <h1>Фото в PDF конвертер</h1>
+        <header class="app-header">
+            <h1>📸 Фото в PDF</h1>
+            <p>Конвертируйте ваши фотографии в PDF с комментариями</p>
+        </header>
 
-        <div class="title-section">
-            <label for="document-title">Заголовок документа:</label>
-            <input type="text" id="document-title" placeholder="Введите заголовок для PDF" value="Мои фотографии">
-
-            <label for="subtitle" style="margin-top: 15px; display: block;">Текст под заголовком:</label>
-            <textarea id="subtitle" class="comment-field" rows="3" placeholder="Дополнительный текст под заголовком документа"></textarea>
+        <main class="main-content">
+            <!-- Форма настроек документа -->
+            <section class="document-settings">
+                <h2>Настройки документа</h2>
+                <div class="form-group">
+                    <label for="document-title">Заголовок PDF:</label>
+            <input
+                type="text"
+                id="document-title"
+                class="input-field"
+                placeholder="Фотоотчёт"
+                value="Фотоотчёт"
+            >
         </div>
+        <div class="form-group">
+            <label for="subtitle">Подзаголовок:</label>
+            <textarea
+                id="subtitle"
+                class="textarea-field"
+                rows="2"
+                placeholder="Описание фотоотчёта..."
+            ></textarea>
+        </div>
+    </section>
 
-        <div class="upload-section">
-            <label for="photo-upload" class="upload-label">
-                🖼️ Выберите фотографии
+    <!-- Загрузка фотографий -->
+    <section class="photo-upload">
+        <h2>Загрузка фотографий</h2>
+        <div class="upload-controls">
+            <input
+                type="file"
+                id="photo-upload"
+                class="file-input"
+                accept="image/*"
+                multiple
+            >
+            <label for="photo-upload" class="btn btn-primary">
+                🖼️ Выбрать фотографии
             </label>
-            <input type="file" id="photo-upload" accept="image/jpeg,image/png,image/webp" multiple>
-            <button id="clear-preview" class="clear-button">Очистить предпросмотр</button>
+            <button id="add-photos" class="btn btn-secondary">
+                ➕ Добавить ещё фото
+            </button>
         </div>
 
-        <div id="pdf-status" class="status-message">Ожидание загрузки библиотек...</div>
+        <!-- Статус операций -->
+        <div id="pdf-status" class="status-message"></div>
+    </section>
 
-        <div class="preview-section">
-            <h2>Предпросмотр фотографий (перетаскивайте для изменения порядка)</h2>
-            <div id="photo-preview" class="preview-container"></div>
+    <!-- Предпросмотр фотографий -->
+    <section class="preview-section">
+        <h2>Предпросмотр фотографий</h2>
+        <div id="photo-preview" class="photo-grid">
+            <!-- Здесь будут отображаться превью фотографий -->
         </div>
+    </section>
 
-        <div class="controls">
-            <button id="generate-pdf" disabled>Создать PDF</button>
-            <a id="download-link" class="hidden" download="photos.pdf">Скачать PDF</a>
-        </div>
-    </div>
+    <!-- Действия -->
+    <section class="action-buttons">
+        <button id="generate-pdf" class="btn btn-success">
+            🖨️ Создать PDF
+        </button>
+        <a id="download-link" class="btn btn-download" href="#" download style="display: none;">
+            ⬇️ Скачать PDF
+        </a>
+        <button id="clear-preview" class="btn btn-danger">
+            🗑️ Очистить всё
+        </button>
+    </section>
+</main>
 
-    <!-- Модульные скрипты -->
-    <script type="module" src="./photo-preview.js"></script>
-    <script type="module" src="./image-optimizer.js"></script>
-    <script type="module" src="./event-listeners.js"></script>
-    <script type="module" src="./generate-pdf.js"></script>
+<footer class="app-footer">
+    <p>© 2026 Фото в PDF. Все права защищены.</p>
+</footer>
+</div>
+
+<!-- Скрипты -->
+<script type="module" src="./event-listeners.js"></script>
+<script type="module" src="./image-optimizer.js"></script>
+<script type="module" src="./photo-preview.js"></script>
+<script type="module" src="./photo-utils.js"></script>
+<script type="module" src="./pdfmake-generator.js"></script>
+<script type="module">
+    // Инициализация приложения после загрузки DOM
+    document.addEventListener('DOMContentLoaded', () => {
+        setupEventListeners();
+        console.log('✅ Приложение инициализировано');
+    });
+</script>
 </body>
 </html>
