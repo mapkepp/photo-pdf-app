@@ -2,161 +2,43 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <link rel="shortcut icon" type="image/x-icon" href="favicon.ico">
-    <meta name="msapplication-TileImage" content="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsQAAA7EAZUrDhsAAAANSURBVBhXYzh8+PB/AAffA0nNPuCLAAAAAElFTkSuQmCC">
-    <title>Просмотр фото</title>
-    <style>
-        .photo-item {
-            margin: 10px;
-            padding: 10px;
-            border: 1px solid #ccc;
-            max-width: 300px;
-        }
-        .photo-item img {
-            max-width: 100%;
-            height: auto;
-            display: block;
-        }
-        .controls {
-            margin-top: 5px;
-        }
-        #photo-container {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 15px;
-        }
-        textarea {
-            width: 100%;
-            margin-top: 5px;
-        }
-        .hidden {
-            display: none;
-        }
-        button {
-            margin: 2px;
-            padding: 5px 10px;
-        }
-
-        /* Индикатор статуса */
-        #pdf-status {
-            margin: 10px 0;
-            padding: 8px;
-            border-radius: 4px;
-            font-weight: bold;
-        }
-
-        /* Стили для контейнера предпросмотра фото */
-        .preview-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-            gap: 15px;
-            margin: 20px 0;
-            padding: 15px;
-            border: 2px dashed #ccc;
-            border-radius: 8px;
-            background-color: #f9f9f9;
-        }
-
-        /* Элемент предпросмотра фото */
-        .photo-preview-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 8px;
-        }
-
-        /* Стили для изображения в предпросмотре */
-        .preview-image {
-            width: 100%;
-            max-width: 150px;
-            max-height: 150px;
-            object-fit: cover;
-            border-radius: 6px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-            transition: transform 0.2s;
-        }
-
-        .preview-image:hover {
-            transform: scale(1.05);
-        }
-
-        /* Подпись под фото */
-        .preview-caption {
-            font-size: 12px;
-            text-align: center;
-            color: #666;
-            word-break: break-all;
-        }
-
-        /* Стили для элементов с ошибками */
-        .photo-preview-item.error {
-            background-color: #ffeaea;
-            padding: 10px;
-            border-radius: 6px;
-            text-align: center;
-        }
-
-        .error-icon {
-            font-size: 24px;
-            margin-bottom: 5px;
-        }
-    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Фото в PDF</title>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <h1>Предварительный просмотр фото</h1>
+    <div class="container">
+        <h1>Фото в PDF конвертер</h1>
 
-    <!-- Поле для загрузки фото -->
-    <div class="upload-section">
-        <label for="photo-upload" class="upload-label">
-            Выберите фотографии для добавления в PDF
-        </label>
-        <input type="file" id="photo-upload" accept="image/jpeg,image/png,image/webp" multiple>
-    </div>
+        <!-- Поле ввода заголовка перемещено выше -->
+        <div class="title-section">
+            <label for="document-title">Заголовок документа:</label>
+            <input type="text" id="document-title" placeholder="Введите заголовок для PDF" value="Мои фотографии">
+        </div>
 
-    <!-- Контейнер для предпросмотра -->
-    <div id="photo-preview" class="preview-container">
-        <!-- Здесь будут отображаться превью фото -->
-        <div class="empty-preview-message">
-            Загрузите фотографии для предпросмотра
+        <div class="upload-section">
+            <label for="photo-upload" class="upload-label">
+                🖼️ Выберите фотографии
+            </label>
+            <input type="file" id="photo-upload" accept="image/jpeg,image/png,image/webp" multiple>
+        </div>
+
+        <div id="pdf-status" class="status-message">Ожидание загрузки библиотек...</div>
+
+        <div class="preview-section">
+            <h2>Предпросмотр фотографий</h2>
+            <div id="photo-preview" class="preview-container"></div>
+        </div>
+
+        <div class="controls">
+            <button id="generate-pdf" disabled>Создать PDF</button>
+            <a id="download-link" class="hidden" download="photos.pdf">Скачать PDF</a>
         </div>
     </div>
 
-    <h2>Генерация PDF</h2>
-    <input type="text" id="title" placeholder="Заголовок PDF" value="Мои фотографии">
-    <button id="generate-pdf" disabled>Создать PDF</button>
-    <div id="pdf-status">Ожидание загрузки библиотек...</div>
-    <a id="download-link" class="hidden" download="photos.pdf">Скачать PDF</a>
-
-    <!-- Библиотека pdfmake -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
-
-    <!-- Подключаем оставшиеся модули -->
-    <script type="module" src="photo-utils.js"></script>
-    <script type="module" src="photo-display.js"></script>
-    <script type="module" src="pdfmake-generator.js"></script>
+    <script src="pdfmake.min.js"></script>
+    <script src="vfs_fonts.js"></script>
+    <script type="module" src="photo-preview.js"></script>
     <script type="module" src="event-listeners.js"></script>
-
-    <script>
-        // Глобальная переменная для хранения фото
-        window.photos = [];
-
-        // Отслеживаем загрузку pdfmake
-        window.addEventListener('load', function() {
-            setTimeout(() => {
-                const status = document.getElementById('pdf-status');
-                if (window.pdfMake) {
-                    status.textContent = 'pdfmake загружен, готов к работе';
-            status.style.color = 'green';
-
-            // Дополнительная диагностика
-            console.log('pdfmake объект:', window.pdfMake);
-        } else {
-            status.textContent = 'Ошибка: pdfmake не загружен';
-            status.style.background = '#ffdddd';
-        }
-            }, 500);
-        });
-    </script>
 </body>
 </html>
