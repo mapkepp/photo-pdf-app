@@ -1,78 +1,75 @@
 export function setupPhotoPreview() {
     console.group('🖼️ setupPhotoPreview: Инициализация модуля предпросмотра');
 
+
     const uploadInput = document.getElementById('photo-upload');
     const previewContainer = document.getElementById('photo-preview');
     const statusElement = document.getElementById('pdf-status');
     const clearButton = document.getElementById('clear-preview');
-    const titleInput = document.getElementById('document-title');
-    const subtitleInput = document.getElementById('subtitle');
+
+    // Инициализируем глобальные переменные
+    window.photos = window.photos || [];
+    window.photoComments = window.photoComments || [];
 
     console.log('🔎 Проверка элементов DOM:');
     console.log('  - Поле загрузки (#photo-upload):', uploadInput);
     console.log('  - Контейнер предпросмотра (#photo-preview):', previewContainer);
     console.log('  - Элемент статуса (#pdf-status):', statusElement);
     console.log('  - Кнопка очистки (#clear-preview):', clearButton);
-    console.log('  - Поле заголовка (#document-title):', titleInput);
-    console.log('  - Поле подзаголовка (#subtitle):', subtitleInput);
 
-    if (!uploadInput) {
-        console.error('❌ Элемент #photo-upload не найден в DOM');
+    if (!uploadInput || !previewContainer || !statusElement || !clearButton) {
+        console.error('❌ Критическая ошибка: не найдены обязательные элементы DOM');
+        if (statusElement) {
+            showStatus(statusElement, 'Ошибка инициализации: не найдены элементы интерфейса', 'error');
+        }
         console.groupEnd();
         return false;
     }
 
-    if (!previewContainer) {
-        console.error('❌ Элемент #photo-preview не найден в DOM');
-        console.groupEnd();
-        return false;
-    }
+    console.log('✓ Все элементы DOM найдены и готовы к работе');
 
-    // Инициализируем глобальные массивы
-    window.photos = window.photos || [];
-    window.photoComments = window.photoComments || {};
-    console.log('✓ Глобальные массивы инициализированы:', window.photos.length, 'фото');
+    // Обработчик загрузки файлов
+    uploadInput.addEventListener('change', function(e) {
+        console.group('📤 Обработчик change: Загрузка фотографий');
 
-    // Обработчик добавления фотографий
-    uploadInput.addEventListener('change', function(event) {
-        console.group('📤 Обработчик change: Добавление новых фотографий');
+        const files = Array.from(e.target.files);
+        console.log('  - Загружено файлов:', files.length);
 
-        const files = event.target.files;
-        console.log(`📷 Найдено новых файлов: ${files ? files.length : 0}`);
-
-        if (!files || files.length === 0) {
-            if (statusElement) {
-                showStatus(statusElement, 'Нет выбранных файлов для добавления', 'info');
-            }
-            console.log('🔎 Нет выбранных файлов для добавления');
+        if (files.length === 0) {
+            console.warn('⚠️ Нет файлов для загрузки');
             console.groupEnd();
             return;
         }
 
         // Добавляем новые файлы к существующим
-        const newFiles = Array.from(files);
-        window.photos = [...window.photos, ...newFiles];
-        console.log('✓ Файлы добавлены к существующим:', window.photos.length, 'всего фото');
+        window.photos.push(...files);
+        // Инициализируем комментарии для новых фотографий
+        for (let i = window.photoComments.length; i < window.photos.length; i++) {
+            window.photoComments[i] = '';
+        }
 
-        // Обновляем предпросмотр
+        console.log(`✓ Добавлено ${files.length} новых фотографий, всего фото: ${window.photos.length}`);
+
         updatePreview();
         console.groupEnd();
     });
 
-    // Обработчик очистки по кнопке
+    // Обработчик очистки предпросмотра
     clearButton.addEventListener('click', function() {
-        console.group('🗑️ Обработчик click: Очистка предпросмотра по кнопке');
+        console.group('🗑️ Обработчик click: Очистка предпросмотра');
 
-        // Очищаем глобальные массивы
         window.photos = [];
-        window.photoComments = {};
-        console.log('✓ Глобальные массивы очищены');
+        window.photoComments = [];
 
-        // Очищаем контейнер предпросмотра
         previewContainer.innerHTML = '';
-        console.log('✓ Контейнер предпросмотра очищен');
+        console.log('✓ Предпросмотр очищен, массивы фотографий и комментариев сброшены');
 
-                // Деактивируем кнопку генерации PDF
+        // Обновляем статус
+        if (statusElement) {
+            showStatus(statusElement, 'Предпросмотр очищен. Загрузите фотографии для продолжения.', 'info');
+        }
+
+        // Деактивируем кнопку генерации PDF
         const generateButton = document.getElementById('generate-pdf');
         if (generateButton) {
             generateButton.disabled = true;
@@ -80,13 +77,6 @@ export function setupPhotoPreview() {
             console.log('✓ Кнопка "Создать PDF" деактивирована');
         }
 
-        // Обновляем статус
-        if (statusElement) {
-            showStatus(statusElement, 'Предпросмотр очищен. Загрузите фотографии для продолжения.', 'info');
-            console.log('✓ Статус обновлён');
-        } else {
-            console.warn('⚠️ Элемент #pdf-status не найден — статус не будет обновлён');
-        }
         console.groupEnd();
     });
 
@@ -149,11 +139,11 @@ export function setupPhotoPreview() {
                 caption.textContent = `${file.name} (${formatFileSize(file.size)})`;
                 console.log('  - Создана подпись:', caption);
 
-                // Добавляем поле для комментария
+                // Добавляем поле для комментария (многострочное)
                 const commentField = document.createElement('textarea');
                 commentField.className = 'comment-field';
                 commentField.placeholder = 'Введите комментарий к фотографии...';
-                commentField.rows = 3;
+                commentField.rows = 4; // Увеличиваем для длинных текстов
                 commentField.dataset.photoIndex = index;
 
                 // Восстанавливаем существующий комментарий, если есть
@@ -163,7 +153,7 @@ export function setupPhotoPreview() {
 
                 commentField.addEventListener('input', function() {
                     window.photoComments[index] = this.value;
-            console.log(`📝 Комментарий для фото ${index}: "${this.value}"`);
+            console.log(`📝 Комментарий для фото ${index}: "${this.value.substring(0, 50)}${this.value.length > 50 ? '...' : ''}"`);
         });
                 console.log('  - Создано поле для комментария:', commentField);
 
@@ -173,6 +163,7 @@ export function setupPhotoPreview() {
                 photoContainer.appendChild(commentField);
                 previewContainer.appendChild(photoContainer);
                 console.log(`✓ Предпросмотр для ${file.name} добавлен в DOM`);
+
 
                 // Дополнительная проверка отображения изображения
                 img.onload = () => {
@@ -209,93 +200,162 @@ export function setupPhotoPreview() {
                 console.groupEnd();
             };
 
-            // Читаем файл как Data URL для отображения
+                        // Читаем файл как Data URL для отображения
             console.log(`🔄 Начинаем чтение файла: ${file.name}`);
             reader.readAsDataURL(file);
         });
 
-        // Активируем кнопку генерации PDF, если есть фото
+        // Активируем кнопку генерации PDF, если есть фотографии
         const generateButton = document.getElementById('generate-pdf');
-        if (generateButton && window.photos.length > 0) {
-            generateButton.disabled = false;
-            generateButton.classList.remove('disabled');
-            console.log('✓ Кнопка "Создать PDF" активирована');
+        if (generateButton) {
+            generateButton.disabled = window.photos.length === 0;
+            if (window.photos.length > 0) {
+                generateButton.classList.remove('disabled');
+                console.log('✓ Кнопка "Создать PDF" активирована');
+            } else {
+                generateButton.classList.add('disabled');
+                console.log('⚠️ Кнопка "Создать PDF" деактивирована (нет фотографий)');
+            }
         }
 
-        // Обновляем статус, если элемент существует
-        if (statusElement && window.photos.length > 0) {
-            showStatus(statusElement, `Загружено ${window.photos.length} фото(ов). Готов к созданию PDF.`, 'success');
-            console.log('✓ Статус обновлён: готов к созданию PDF');
+        // Обновляем статус
+        if (statusElement) {
+            if (window.photos.length > 0) {
+                showStatus(
+                    statusElement,
+            `Загружено ${window.photos.length} фото(ов). Добавьте комментарии при необходимости.`,
+            'success'
+        );
+            } else {
+                showStatus(statusElement, 'Загрузите фотографии для начала работы', 'info');
+            }
         }
+
+        console.log(`✅ Предпросмотр успешно обновлён. Всего фото: ${window.photos.length}`);
         console.groupEnd();
     }
 
-    // Настройка перетаскивания и перемещения элементов
+    // Функция настройки перетаскивания и перемещения
     function setupDragAndDrop(element, index) {
-        console.group(`🤹 setupDragAndDrop: Настройка перетаскивания для элемента ${index}`);
+        console.group(`🔗 setupDragAndDrop: Настройка перетаскивания для элемента ${index}`);
+
+        let draggedElement = null;
+        let draggedIndex = -1;
 
         element.addEventListener('dragstart', function(e) {
-            e.dataTransfer.setData('text/plain', index);
-            element.classList.add('dragging');
-            console.log(`🎯 Drag start: элемент ${index} начал перетаскиваться`);
+            console.group('🖱️ dragstart: Начало перетаскивания');
+            draggedElement = this;
+            draggedIndex = parseInt(this.dataset.index, 10);
+            this.classList.add('dragging');
+            e.dataTransfer.effectAllowed = 'move';
+            e.dataTransfer.setData('text/html', this.innerHTML);
+            console.log(`✓ Элемент ${draggedIndex} начал перетаскиваться`);
+            console.groupEnd();
         });
 
         element.addEventListener('dragend', function() {
-            element.classList.remove('dragging');
-            console.log(`🛑 Drag end: элемент ${index} завершён перетаскивание`);
+            console.group('🖱️ dragend: Завершение перетаскивания');
+            this.classList.remove('dragging');
+            draggedElement = null;
+            draggedIndex = -1;
+            console.log('✓ Перетаскивание завершено');
+            console.groupEnd();
         });
 
-        // Обработчик для области над которой перетаскивают
+        // Обработчики для контейнеров, куда можно бросить элемент
         element.addEventListener('dragover', function(e) {
             e.preventDefault();
-            element.classList.add('drag-over');
-            console.log(`↕ Drag over: элемент ${index} над областью`);
+            this.classList.add('drag-over');
+            e.dataTransfer.dropEffect = 'move';
         });
 
         element.addEventListener('dragleave', function() {
-            element.classList.remove('drag-over');
-            console.log(`← Drag leave: элемент ${index} покинул область`);
+            this.classList.remove('drag-over');
         });
 
         element.addEventListener('drop', function(e) {
             e.preventDefault();
-            element.classList.remove('drag-over');
+            this.classList.remove('drag-over');
 
-            const draggedIndex = parseInt(e.dataTransfer.getData('text/plain'));
-            if (draggedIndex !== index) {
-                                // Меняем местами элементы в массиве
-                [window.photos[draggedIndex], window.photos[index]] = [window.photos[index], window.photos[draggedIndex]];
-                // Меняем местами комментарии
-                [window.photoComments[draggedIndex], window.photoComments[index]] = [window.photoComments[index], window.photoComments[draggedIndex]];
+            const targetIndex = parseInt(this.dataset.index, 10);
 
+            if (draggedIndex !== targetIndex && draggedIndex >= 0) {
+                console.group('🔁 drop: Перемещение элемента');
+                console.log(`  - Перемещаем элемент ${draggedIndex} на позицию ${targetIndex}`);
 
-                console.log(`🔁 Drop: элементы ${draggedIndex} и ${index} поменялись местами`);
+                // Меняем местами элементы в массиве фотографий
+                [window.photos[draggedIndex], window.photos[targetIndex]] =
+                    [window.photos[targetIndex], window.photos[draggedIndex]];
+
+                // Меняем местами комментарии вместе с фотографиями
+                [window.photoComments[draggedIndex], window.photoComments[targetIndex]] =
+            [window.photoComments[targetIndex], window.photoComments[draggedIndex]];
+
                 console.log('✓ Массивы photos и photoComments обновлены');
 
-                // Обновляем предпросмотр
+                // Обновляем все data-атрибуты индексов
+                updateIndices();
+
+                // Перестраиваем предпросмотр
                 updatePreview();
+                console.log('✅ Элемент успешно перемещён');
+                console.groupEnd();
             }
         });
+        console.log('✓ Обработчики перетаскивания настроены для элемента');
         console.groupEnd();
     }
 
-    // Функция для добавления фотографий (может вызываться извне)
-    window.addPhotos = function(files) {
-        console.group('📤 addPhotos: Добавление фотографий извне');
+    // Функция обновления индексов после перемещения
+    function updateIndices() {
+        console.group('🔢 updateIndices: Обновление индексов элементов');
+        const items = previewContainer.querySelectorAll('.photo-preview-item');
+        items.forEach((item, index) => {
+            item.dataset.index = index;
+            // Обновляем data-атрибут в поле комментария
+            const commentField = item.querySelector('.comment-field');
+            if (commentField) {
+                commentField.dataset.photoIndex = index;
+            }
+            console.log(`  - Элемент ${index} получил индекс ${index}`);
+        });
+        console.log('✓ Все индексы обновлены');
+        console.groupEnd();
+    }
 
-        if (!files || files.length === 0) {
-            console.warn('⚠️ Нет файлов для добавления');
+    // Вспомогательная функция для форматирования размера файла
+    function formatFileSize(bytes) {
+        console.group('📏 formatFileSize: Форматирование размера файла');
+        console.log('  - Входные байты:', bytes);
+
+        if (bytes === 0) {
+            console.log('  - Результат: 0 Bytes');
             console.groupEnd();
-            return;
+            return '0 Bytes';
         }
 
-        const newFiles = Array.from(files);
-        window.photos = [...window.photos, ...newFiles];
-        console.log('✓ Файлы добавлены к существующим:', window.photos.length, 'всего фото');
+        const k = 1024;
+        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
 
-        updatePreview();
+        // Дополнительная проверка на корректность индекса
+        if (i >= sizes.length) {
+            console.warn('⚠️ Размер файла превышает поддерживаемый диапазон (GB)');
+            const maxIndex = sizes.length - 1;
+            const formattedSize = parseFloat((bytes / Math.pow(k, maxIndex)).toFixed(2)) + ' ' + sizes[maxIndex];
+            console.log('  - Отформатированный размер (ограниченный):', formattedSize);
+            console.groupEnd();
+            return formattedSize;
+        }
+
+        const formattedSize = parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+
+        console.log('  - Рассчитанный индекс размера:', i);
+        console.log('  - Единица измерения:', sizes[i]);
+        console.log('  - Отформатированный размер:', formattedSize);
         console.groupEnd();
-    };
+        return formattedSize;
+    }
 
     console.log('🎉 Модуль предпросмотра успешно инициализирован');
     console.groupEnd();
@@ -303,91 +363,5 @@ export function setupPhotoPreview() {
     return true;
 }
 
-// Вспомогательная функция для форматирования размера файла
-function formatFileSize(bytes) {
-    console.group('📏 formatFileSize: Форматирование размера файла');
-    console.log('  - Входные байты:', bytes);
-
-    if (bytes === 0) {
-        console.log('  - Результат: 0 Bytes');
-        console.groupEnd();
-        return '0 Bytes';
-    }
-
-    const k = 1024;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-
-    // Дополнительная проверка на корректность индекса
-    if (i >= sizes.length) {
-        console.warn('⚠️ Размер файла превышает поддерживаемый диапазон (GB)');
-        const maxIndex = sizes.length - 1;
-        const formattedSize = parseFloat((bytes / Math.pow(k, maxIndex)).toFixed(2)) + ' ' + sizes[maxIndex];
-        console.log('  - Отформатированный размер (ограниченный):', formattedSize);
-        console.groupEnd();
-        return formattedSize;
-    }
-
-    const formattedSize = parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-
-    console.log('  - Рассчитанный индекс размера:', i);
-    console.log('  - Единица измерения:', sizes[i]);
-    console.log('  - Отформатированный размер:', formattedSize);
-    console.groupEnd();
-    return formattedSize;
-}
-
-// Функция для отображения статуса — принимает statusElement как параметр
-function showStatus(statusElement, message, type) {
-    console.group('📝 showStatus: Обновление статуса');
-    console.log('  - Сообщение: ' + message);
-    console.log('  - Тип: ' + type);
-
-    if (!statusElement) {
-        console.warn('⚠️ Элемент статуса (#pdf-status) не найден');
-        console.groupEnd();
-        return;
-    }
-
-    statusElement.textContent = message;
-    statusElement.className = 'status-message';
-
-    switch (type) {
-        case 'success':
-            statusElement.classList.remove('status-error');
-            statusElement.classList.add('status-success');
-            console.log('✓ Установлен класс статуса: status-success');
-            break;
-        case 'error':
-            statusElement.classList.remove('status-success');
-            statusElement.classList.add('status-error');
-            console.log('✓ Установлен класс статуса: status-error');
-            break;
-        default:
-            statusElement.classList.remove('status-success', 'status-error');
-            statusElement.style.background = '#fff3cd';
-            statusElement.style.color = '#856404';
-            console.log('✓ Установлены стили для информационного статуса');
-            break;
-    }
-    console.log('✓ Статус успешно обновлён');
-    console.groupEnd();
-}
-
-// Функция для очистки статуса — принимает statusElement как параметр
-function clearStatus(statusElement) {
-    console.group('🗑️ clearStatus: Очистка статуса');
-
-    if (!statusElement) {
-        console.warn('⚠️ Элемент статуса (#pdf-status) не найден — пропуск очистки');
-        console.groupEnd();
-        return;
-    }
-
-    statusElement.textContent = '';
-    statusElement.className = 'status-message';
-    statusElement.style.removeProperty('background');
-    statusElement.style.removeProperty('color');
-    console.log('✓ Статус успешно очищен');
-    console.groupEnd();
-}
+// Экспортируем вспомогательные функции, если они нужны в других модулях
+export { formatFileSize };
