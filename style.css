@@ -40,7 +40,8 @@ h1 {
     font-size: 16px;
 }
 
-.title-section input {
+.title-section input,
+.title-section textarea {
     width: 100%;
     padding: 12px;
     border: 2px solid #ddd;
@@ -48,17 +49,37 @@ h1 {
     font-size: 16px;
     transition: border-color 0.3s ease;
     box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+    background-color: white;
 }
 
-.title-section input:focus {
+.title-section input:focus,
+.title-section textarea:focus {
     outline: none;
     border-color: #007bff;
     box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
 }
 
+/* Кнопка очистки */
+.clear-button {
+    background: #dc3545;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-left: 10px;
+    transition: background 0.3s ease;
+}
+
+.clear-button:hover {
+    background: #c82333;
+}
+
 /* Стили для секции загрузки файлов */
 .upload-section {
     margin-bottom: 25px;
+    display: flex;
+    align-items: center;
 }
 
 .upload-label {
@@ -129,6 +150,8 @@ h1 {
     transition: transform 0.2s ease, box-shadow 0.2s ease;
     display: flex;
     flex-direction: column;
+    position: relative;
+    cursor: move; /* Указываем, что элемент можно перетаскивать */
 }
 
 .photo-preview-item:hover {
@@ -236,6 +259,19 @@ h1 {
     display: none !important;
 }
 
+/* Стили для перетаскивания */
+.dragging {
+    opacity: 0.5;
+    transform: scale(0.95);
+    z-index: 1000;
+    position: absolute;
+}
+
+.drag-over {
+    border: 2px dashed #007bff;
+    background-color: #e3f2fd;
+}
+
 /* Адаптивность */
 @media (max-width: 768px) {
     .container {
@@ -256,6 +292,17 @@ h1 {
     #download-link {
         width: 100%;
         text-align: center;
+    }
+
+    .upload-section {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+
+    .clear-button {
+        margin-left: 0;
+        width: 100%;
     }
 }
 
