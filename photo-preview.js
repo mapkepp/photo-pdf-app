@@ -62,15 +62,15 @@ export function setupPhotoPreview() {
         // Обрабатываем каждый файл для создания превью
         Array.from(files).forEach((file, index) => {
             console.group(`🖼️ Обработка файла ${index + 1}: ${file.name}`);
-            console.log('  -Размер: ' + formatFileSize(file.size));
-            console.log('  -Тип: ' + file.type);
-            console.log('  -Файл объект:', file);
+            console.log('  - Размер: ' + formatFileSize(file.size));
+            console.log('  - Тип: ' + file.type);
+            console.log('  - Файл объект:', file);
 
             if (!file.type.match('image.*')) {
                 console.warn(`⚠️ Файл ${file.name} не является изображением, пропускаем`);
                 if (statusElement) {
                     showStatus(statusElement, `Файл ${file.name} не является изображением`, 'error');
-        }
+                }
                 console.groupEnd();
                 return;
             }
@@ -79,25 +79,25 @@ export function setupPhotoPreview() {
 
             reader.onload = function(e) {
                 console.log(`✅ Файл ${file.name} успешно прочитан (Data URL создан)`);
-                console.log('  -Data URL:', e.target.result.substring(0, 50) + '...');
+                console.log('  - Data URL:', e.target.result.substring(0, 50) + '...');
 
                 // Создаём элемент контейнера для фото
                 const photoContainer = document.createElement('div');
                 photoContainer.className = 'photo-preview-item';
-                console.log('  -Создан контейнер для фото:', photoContainer);
+                console.log('  - Создан контейнер для фото:', photoContainer);
 
                 // Создаём изображение
                 const img = document.createElement('img');
                 img.src = e.target.result;
                 img.alt = `Preview ${file.name}`;
                 img.className = 'preview-image';
-                console.log('  -Создано изображение:', img);
+                console.log('  - Создано изображение:', img);
 
                 // Добавляем подпись с именем файла и размером
                 const caption = document.createElement('div');
                 caption.className = 'preview-caption';
                 caption.textContent = `${file.name} (${formatFileSize(file.size)})`;
-                console.log('  -Создана подпись:', caption);
+                console.log('  - Создана подпись:', caption);
 
                 // Добавляем поле для комментария
                 const commentField = document.createElement('textarea');
@@ -109,8 +109,7 @@ export function setupPhotoPreview() {
                     window.photoComments[index] = this.value;
             console.log(`📝 Комментарий для фото ${index}: "${this.value}"`);
         });
-                console.log('  -Создано поле для комментария:', commentField);
-
+                console.log('  - Создано поле для комментария:', commentField);
 
                 // Собираем всё вместе
                 photoContainer.appendChild(img);
@@ -123,8 +122,14 @@ export function setupPhotoPreview() {
                 img.onload = () => {
                     console.log(`🖼️ Изображение ${file.name} успешно загрузилось и отображается`);
         };
-        img.onerror = () => {
-            console.error(`❌ Ошибка загрузки изображения ${file.name} в DOM`);
+        img.onerror = (error) => {
+            console.error(`❌ Ошибка загрузки изображения ${file.name} в DOM:`, error);
+            // Заменяем изображение заглушкой при ошибке
+            photoContainer.innerHTML = `
+                <div class="error-icon">❌</div>
+                <div class="preview-caption">Ошибка отображения: ${file.name}</div>
+            `;
+            photoContainer.classList.add('error');
             if (statusElement) {
                 showStatus(statusElement, `Ошибка отображения изображения: ${file.name}`, 'error');
             }
@@ -132,8 +137,8 @@ export function setupPhotoPreview() {
                 console.groupEnd();
             };
 
-                        reader.onerror = function() {
-                console.error(`❌ Ошибка при чтении файла: ${file.name}`);
+            reader.onerror = function(error) {
+                console.error(`❌ Ошибка при чтении файла: ${file.name}, ошибка:`, error);
                 // Создаём заглушку для проблемных файлов
                 const errorContainer = document.createElement('div');
                 errorContainer.className = 'photo-preview-item error';
