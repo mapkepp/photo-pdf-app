@@ -7,8 +7,8 @@ export function setupPhotoPreview() {
 
     console.log('🔎 Проверка элементов DOM:');
     console.log('  - Поле загрузки (#photo-upload):', uploadInput);
-    console.log('  - Контейнер предпросмотра (#photo-preview):', previewContainer);
-    console.log('  - Элемент статуса (#pdf-status):', statusElement);
+    console.log('  -Контейнер предпросмотра (#photo-preview):', previewContainer);
+    console.log('  -Элемент статуса (#pdf-status):', statusElement);
 
     if (!uploadInput) {
         console.error('❌ Элемент #photo-upload не найден в DOM');
@@ -34,9 +34,9 @@ export function setupPhotoPreview() {
         previewContainer.innerHTML = '';
         console.log('✓ Контейнер предпросмотра очищен');
 
-        // Безопасный вызов clearStatus
+        // Безопасный вызов clearStatus — передаём statusElement
         if (statusElement) {
-            clearStatus();
+            clearStatus(statusElement);
             console.log('✓ Статус очищен');
         } else {
             console.warn('⚠️ Элемент #pdf-status не найден — статус не будет обновлён');
@@ -44,7 +44,7 @@ export function setupPhotoPreview() {
 
         if (!files || files.length === 0) {
             if (statusElement) {
-                showStatus('Нет выбранных файлов для предпросмотра', 'info');
+                showStatus(statusElement, 'Нет выбранных файлов для предпросмотра', 'info');
             }
             console.log('🔎 Нет выбранных файлов для предпросмотра');
             console.groupEnd();
@@ -60,14 +60,14 @@ export function setupPhotoPreview() {
         // Обрабатываем каждый файл для создания превью
         Array.from(files).forEach((file, index) => {
             console.group(`🖼️ Обработка файла ${index + 1}: ${file.name}`);
-            console.log('  - Размер: ' + formatFileSize(file.size));
-            console.log('  - Тип: ' + file.type);
-            console.log('  - Файл объект:', file);
+            console.log('  -Размер: ' + formatFileSize(file.size));
+            console.log('  -Тип: ' + file.type);
+            console.log('  -Файл объект:', file);
 
             if (!file.type.match('image.*')) {
                 console.warn(`⚠️ Файл ${file.name} не является изображением, пропускаем`);
                 if (statusElement) {
-                    showStatus(`Файл ${file.name} не является изображением`, 'error');
+                    showStatus(statusElement, `Файл ${file.name} не является изображением`, 'error');
                 }
                 console.groupEnd();
                 return;
@@ -77,25 +77,25 @@ export function setupPhotoPreview() {
 
             reader.onload = function(e) {
                 console.log(`✅ Файл ${file.name} успешно прочитан (Data URL создан)`);
-                console.log('  - Data URL:', e.target.result.substring(0, 50) + '...');
+                console.log('  -Data URL:', e.target.result.substring(0, 50) + '...');
 
                 // Создаём элемент контейнера для фото
                 const photoContainer = document.createElement('div');
                 photoContainer.className = 'photo-preview-item';
-                console.log('  - Создан контейнер для фото:', photoContainer);
+                console.log('  -Создан контейнер для фото:', photoContainer);
 
                 // Создаём изображение
                 const img = document.createElement('img');
                 img.src = e.target.result;
                 img.alt = `Preview ${file.name}`;
                 img.className = 'preview-image';
-                console.log('  - Создано изображение:', img);
+                console.log('  -Создано изображение:', img);
 
                 // Добавляем подпись с именем файла и размером
                 const caption = document.createElement('div');
                 caption.className = 'preview-caption';
                 caption.textContent = `${file.name} (${formatFileSize(file.size)})`;
-                console.log('  - Создана подпись:', caption);
+                console.log('  -Создана подпись:', caption);
 
                 // Собираем всё вместе
                 photoContainer.appendChild(img);
@@ -116,7 +116,7 @@ export function setupPhotoPreview() {
                 `;
                 previewContainer.appendChild(errorContainer);
                 if (statusElement) {
-                    showStatus(`Ошибка при загрузке файла: ${file.name}`, 'error');
+                    showStatus(statusElement, `Ошибка при загрузке файла: ${file.name}`, 'error');
                 }
                 console.groupEnd();
             };
@@ -138,7 +138,7 @@ export function setupPhotoPreview() {
 
         // Обновляем статус, если элемент существует
         if (statusElement) {
-            showStatus(`Загружено ${files.length} фото(ов). Готов к созданию PDF.`, 'success');
+            showStatus(statusElement, `Загружено ${files.length} фото(ов). Готов к созданию PDF.`, 'success');
             console.log('✓ Статус обновлён: готов к созданию PDF');
         }
         console.groupEnd();
@@ -159,9 +159,9 @@ export function setupPhotoPreview() {
             console.log('✓ Кнопка "Создать PDF" деактивирована');
         }
 
-        // Безопасный вызов clearStatus при клике
+        // Безопасный вызов clearStatus при клике — передаём statusElement
         if (statusElement) {
-            clearStatus();
+            clearStatus(statusElement);
             console.log('✓ Статус очищен при клике');
         }
         console.groupEnd();
@@ -184,8 +184,8 @@ function formatFileSize(bytes) {
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
 }
 
-// Функция для отображения статуса
-function showStatus(message, type) {
+// Функция для отображения статуса — принимает statusElement как параметр
+function showStatus(statusElement, message, type) {
     console.group('📝 showStatus: Обновление статуса');
     console.log('  - Сообщение: ' + message);
     console.log('  - Тип: ' + type);
@@ -221,8 +221,8 @@ function showStatus(message, type) {
     console.groupEnd();
 }
 
-// Функция для очистки статуса
-function clearStatus() {
+// Функция для очистки статуса — принимает statusElement как параметр
+function clearStatus(statusElement) {
     console.group('🗑️ clearStatus: Очистка статуса');
 
     if (!statusElement) {
