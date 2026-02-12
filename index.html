@@ -3,9 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Фото в PDF</title>
-    <!-- Исправление пути к CSS -->
+    <title>Фото в PDF конвертер</title>
+    <!-- Фавикон из корневой папки -->
+    <link rel="icon" href="/favicon.ico" type="image/x-icon">
+    <!-- Исправленные пути к CSS и JS -->
     <link rel="stylesheet" href="./styles.css">
+    <script src="./pdfmake.min.js"></script>
+    <script src="./vfs_fonts.js"></script>
 </head>
 <body>
     <div class="container">
@@ -40,10 +44,9 @@
         </div>
     </div>
 
-    <!-- Исправления путей к JS‑библиотекам -->
-    <script src="./pdfmake.min.js"></script>
-    <script src="./vfs_fonts.js"></script>
+    <!-- Модульные скрипты -->
     <script type="module" src="./photo-preview.js"></script>
+    <script type="module" src="./image-optimizer.js"></script>
     <script type="module" src="./event-listeners.js"></script>
 </body>
 </html>
