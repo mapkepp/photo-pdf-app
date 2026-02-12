@@ -4,13 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Фото в PDF</title>
-    <link rel="stylesheet" href="styles.css">
+    <!-- Исправление пути к CSS -->
+    <link rel="stylesheet" href="./styles.css">
 </head>
 <body>
     <div class="container">
         <h1>Фото в PDF конвертер</h1>
 
-        <!-- Поле ввода заголовка перемещено выше -->
         <div class="title-section">
             <label for="document-title">Заголовок документа:</label>
             <input type="text" id="document-title" placeholder="Введите заголовок для PDF" value="Мои фотографии">
@@ -36,9 +36,10 @@
         </div>
     </div>
 
-    <script src="pdfmake.min.js"></script>
-    <script src="vfs_fonts.js"></script>
-    <script type="module" src="photo-preview.js"></script>
-    <script type="module" src="event-listeners.js"></script>
+    <!-- Исправления путей к JS‑библиотекам -->
+    <script src="./pdfmake.min.js"></script>
+    <script src="./vfs_fonts.js"></script>
+    <script type="module" src="./photo-preview.js"></script>
+    <script type="module" src="./event-listeners.js"></script>
 </body>
 </html>
