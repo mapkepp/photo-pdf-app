@@ -1,3 +1,7 @@
+/**
+ * Библиотека оптимизации изображений
+ * @class ImageOptimizer
+ */
 export class ImageOptimizer {
     constructor() {
         console.group('🛠️ ImageOptimizer: Инициализация оптимизатора изображений');
@@ -23,11 +27,13 @@ export class ImageOptimizer {
             const reader = new FileReader();
 
             reader.onload = (e) => {
+                console.log('  - Файл успешно прочитан, начинаем загрузку изображения');
                 const img = new Image();
-                img.onload = () => {
-                    console.log('  - Размеры исходного изображения:', img.width, 'x', img.height, 'px');
 
-                        // Определяем новые размеры
+                img.onload = () => {
+                    console.log('  - Изображение загружено, размеры:', img.width, 'x', img.height, 'px');
+
+            // Определяем новые размеры
             let newWidth, newHeight;
             if (img.width > this.maxWidth) {
                 newWidth = this.maxWidth;
@@ -69,16 +75,16 @@ export class ImageOptimizer {
             resolve(dataUrl);
         };
 
-        img.onerror = () => {
-            console.error('❌ Ошибка загрузки изображения для оптимизации:', file.name);
+        img.onerror = (error) => {
+            console.error('❌ Ошибка загрузки изображения для оптимизации:', file.name, error);
             reject(new Error('Ошибка загрузки изображения'));
         };
 
         img.src = e.target.result;
     };
 
-    reader.onerror = () => {
-        console.error('❌ Ошибка чтения файла:', file.name);
+    reader.onerror = (error) => {
+        console.error('❌ Ошибка чтения файла:', file.name, error);
         reject(new Error('Ошибка чтения файла'));
     };
 
@@ -98,16 +104,27 @@ console.groupEnd();
 async optimizeImagesBatch(files) {
     console.group('📦 optimizeImagesBatch: Пакетная оптимизация', files.length, 'изображений');
 
-    const promises = files.map(file => this.optimizeImage(file));
-    const results = await Promise.all(promises);
+    const results = [];
+    for (let i = 0; i < files.length; i++) {
+        try {
+            console.log(`🔄 Оптимизация изображения ${i + 1}/${files.length}:`, files[i].name);
+            const optimizedImage = await this.optimizeImage(files[i]);
+            results.push(optimizedImage);
+            console.log(`✅ Изображение ${i + 1} оптимизировано успешно`);
+        } catch (error) {
+            console.error(`❌ Ошибка оптимизации изображения ${i + 1}:`, files[i].name, error);
+            // Пропускаем проблемные файлы, но продолжаем обработку остальных
+            results.push(null);
+        }
+    }
 
-    console.log('✓ Все изображения оптимизированы успешно');
+    console.log('✓ Все изображения обработаны (успешно или с ошибками)');
     console.groupEnd();
     return results;
 }
 }
 
-// Вспомогательная функция для форматирования размера файла (копируем из photo-preview.js для автономности библиотеки)
+// Вспомогательная функция для форматирования размера файла
 function formatFileSize(bytes) {
     if (bytes === 0) return '0 Bytes';
 
@@ -122,6 +139,3 @@ function formatFileSize(bytes) {
 
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
 }
-
-// Экспортируем класс
-export { ImageOptimizer };
