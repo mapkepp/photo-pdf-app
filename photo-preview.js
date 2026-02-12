@@ -4,13 +4,17 @@ export function setupPhotoPreview() {
     const uploadInput = document.getElementById('photo-upload');
     const previewContainer = document.getElementById('photo-preview');
     const statusElement = document.getElementById('pdf-status');
+    const clearButton = document.getElementById('clear-preview');
     const titleInput = document.getElementById('document-title');
+    const subtitleInput = document.getElementById('subtitle');
 
     console.log('🔎 Проверка элементов DOM:');
     console.log('  - Поле загрузки (#photo-upload):', uploadInput);
     console.log('  - Контейнер предпросмотра (#photo-preview):', previewContainer);
     console.log('  - Элемент статуса (#pdf-status):', statusElement);
+    console.log('  - Кнопка очистки (#clear-preview):', clearButton);
     console.log('  - Поле заголовка (#document-title):', titleInput);
+    console.log('  - Поле подзаголовка (#subtitle):', subtitleInput);
 
     if (!uploadInput) {
         console.error('❌ Элемент #photo-upload не найден в DOM');
@@ -24,47 +28,88 @@ export function setupPhotoPreview() {
         return false;
     }
 
-    console.log('✓ Все основные элементы найдены в DOM');
+    // Инициализируем глобальные массивы
+    window.photos = window.photos || [];
+    window.photoComments = window.photoComments || {};
+    console.log('✓ Глобальные массивы инициализированы:', window.photos.length, 'фото');
 
+    // Обработчик добавления фотографий
     uploadInput.addEventListener('change', function(event) {
-        console.group('📤 Обработчик change: Загрузка файлов');
+        console.group('📤 Обработчик change: Добавление новых фотографий');
 
         const files = event.target.files;
-        console.log(`📷 Найдено файлов: ${files ? files.length : 0}`);
+        console.log(`📷 Найдено новых файлов: ${files ? files.length : 0}`);
+
+        if (!files || files.length === 0) {
+            if (statusElement) {
+                showStatus(statusElement, 'Нет выбранных файлов для добавления', 'info');
+            }
+            console.log('🔎 Нет выбранных файлов для добавления');
+            console.groupEnd();
+            return;
+        }
+
+        // Добавляем новые файлы к существующим
+        const newFiles = Array.from(files);
+        window.photos = [...window.photos, ...newFiles];
+        console.log('✓ Файлы добавлены к существующим:', window.photos.length, 'всего фото');
+
+        // Обновляем предпросмотр
+        updatePreview();
+        console.groupEnd();
+    });
+
+    // Обработчик очистки по кнопке
+    clearButton.addEventListener('click', function() {
+        console.group('🗑️ Обработчик click: Очистка предпросмотра по кнопке');
+
+        // Очищаем глобальные массивы
+        window.photos = [];
+        window.photoComments = {};
+        console.log('✓ Глобальные массивы очищены');
 
         // Очищаем контейнер предпросмотра
         previewContainer.innerHTML = '';
         console.log('✓ Контейнер предпросмотра очищен');
 
+                // Деактивируем кнопку генерации PDF
+        const generateButton = document.getElementById('generate-pdf');
+        if (generateButton) {
+            generateButton.disabled = true;
+            generateButton.classList.add('disabled');
+            console.log('✓ Кнопка "Создать PDF" деактивирована');
+        }
+
+        // Обновляем статус
         if (statusElement) {
-            clearStatus(statusElement);
-            console.log('✓ Статус очищен');
+            showStatus(statusElement, 'Предпросмотр очищен. Загрузите фотографии для продолжения.', 'info');
+            console.log('✓ Статус обновлён');
         } else {
             console.warn('⚠️ Элемент #pdf-status не найден — статус не будет обновлён');
         }
+        console.groupEnd();
+    });
 
-        if (!files || files.length === 0) {
+    // Функция обновления предпросмотра
+    function updatePreview() {
+        console.group('🔄 updatePreview: Обновление предпросмотра');
+
+        previewContainer.innerHTML = '';
+        console.log('✓ Контейнер предпросмотра очищен перед обновлением');
+
+        if (window.photos.length === 0) {
             if (statusElement) {
-                showStatus(statusElement, 'Нет выбранных файлов для предпросмотра', 'info');
+                showStatus(statusElement, 'Нет фотографий для предпросмотра', 'info');
             }
-            console.log('🔎 Нет выбранных файлов для предпросмотра');
+            console.log('🔎 Нет фотографий для отображения');
             console.groupEnd();
             return;
         }
 
-        console.log(`📷 Загружено ${files.length} фото(ов) для предпросмотра`);
+        console.log(`📷 Отображаем ${window.photos.length} фото(ов) в предпросмотре`);
 
-        // Сохраняем файлы глобально для использования в генерации PDF
-        window.photos = Array.from(files);
-        window.photoComments = {}; // Инициализируем хранилище комментариев
-        console.log('✓ Файлы сохранены в window.photos:', window.photos);
-
-        // Обрабатываем каждый файл для создания превью
-        Array.from(files).forEach((file, index) => {
-            console.group(`🖼️ Обработка файла ${index + 1}: ${file.name}`);
-            console.log('  - Размер: ' + formatFileSize(file.size));
-            console.log('  - Тип: ' + file.type);
-            console.log('  - Файл объект:', file);
+        window.photos.forEach((file, index) => {
+            console.group(`🖼️ Создание элемента предпросмотра для фото ${index + 1}: ${file.name}`);
 
             if (!file.type.match('image.*')) {
                 console.warn(`⚠️ Файл ${file.name} не является изображением, пропускаем`);
@@ -79,12 +124,17 @@ export function setupPhotoPreview() {
 
             reader.onload = function(e) {
                 console.log(`✅ Файл ${file.name} успешно прочитан (Data URL создан)`);
-                console.log('  - Data URL:', e.target.result.substring(0, 50) + '...');
 
                 // Создаём элемент контейнера для фото
                 const photoContainer = document.createElement('div');
                 photoContainer.className = 'photo-preview-item';
+                photoContainer.dataset.index = index;
+                photoContainer.draggable = true; // Включаем перетаскивание
+
                 console.log('  - Создан контейнер для фото:', photoContainer);
+
+                // Обработчики для перетаскивания
+                setupDragAndDrop(photoContainer, index);
 
                 // Создаём изображение
                 const img = document.createElement('img');
@@ -105,6 +155,12 @@ export function setupPhotoPreview() {
                 commentField.placeholder = 'Введите комментарий к фотографии...';
                 commentField.rows = 3;
                 commentField.dataset.photoIndex = index;
+
+                // Восстанавливаем существующий комментарий, если есть
+                if (window.photoComments[index]) {
+                    commentField.value = window.photoComments[index];
+                }
+
                 commentField.addEventListener('input', function() {
                     window.photoComments[index] = this.value;
             console.log(`📝 Комментарий для фото ${index}: "${this.value}"`);
@@ -160,46 +216,86 @@ export function setupPhotoPreview() {
 
         // Активируем кнопку генерации PDF, если есть фото
         const generateButton = document.getElementById('generate-pdf');
-        if (generateButton) {
+        if (generateButton && window.photos.length > 0) {
             generateButton.disabled = false;
             generateButton.classList.remove('disabled');
             console.log('✓ Кнопка "Создать PDF" активирована');
-        } else {
-            console.warn('⚠️ Кнопка #generate-pdf не найдена в DOM');
         }
 
         // Обновляем статус, если элемент существует
-        if (statusElement) {
-            showStatus(statusElement, `Загружено ${files.length} фото(ов). Готов к созданию PDF.`, 'success');
+        if (statusElement && window.photos.length > 0) {
+            showStatus(statusElement, `Загружено ${window.photos.length} фото(ов). Готов к созданию PDF.`, 'success');
             console.log('✓ Статус обновлён: готов к созданию PDF');
         }
         console.groupEnd();
-    });
+    }
 
-    // Добавляем обработчик для очистки предпросмотра при повторном выборе файлов
-    uploadInput.addEventListener('click', function() {
-        console.group('🗑️ Обработчик click: Очистка предпросмотра');
+    // Настройка перетаскивания и перемещения элементов
+    function setupDragAndDrop(element, index) {
+        console.group(`🤹 setupDragAndDrop: Настройка перетаскивания для элемента ${index}`);
 
-        // При клике на загрузку очищаем старый предпросмотр
-        previewContainer.innerHTML = '';
-        console.log('✓ Старый предпросмотр очищен');
+        element.addEventListener('dragstart', function(e) {
+            e.dataTransfer.setData('text/plain', index);
+            element.classList.add('dragging');
+            console.log(`🎯 Drag start: элемент ${index} начал перетаскиваться`);
+        });
 
-        const generateButton = document.getElementById('generate-pdf');
-        if (generateButton) {
-            generateButton.disabled = true;
-            generateButton.classList.add('disabled');
-            console.log('✓ Кнопка "Создать PDF" деактивирована');
-        }
+        element.addEventListener('dragend', function() {
+            element.classList.remove('dragging');
+            console.log(`🛑 Drag end: элемент ${index} завершён перетаскивание`);
+        });
 
-        // Безопасный вызов clearStatus при клике — передаём statusElement
-        if (statusElement) {
-            clearStatus(statusElement);
-            console.log('✓ Статус очищен при клике');
-        } else {
-            console.warn('⚠️ Элемент #pdf-status не найден — статус не будет очищен');
-        }
+        // Обработчик для области над которой перетаскивают
+        element.addEventListener('dragover', function(e) {
+            e.preventDefault();
+            element.classList.add('drag-over');
+            console.log(`↕ Drag over: элемент ${index} над областью`);
+        });
+
+        element.addEventListener('dragleave', function() {
+            element.classList.remove('drag-over');
+            console.log(`← Drag leave: элемент ${index} покинул область`);
+        });
+
+        element.addEventListener('drop', function(e) {
+            e.preventDefault();
+            element.classList.remove('drag-over');
+
+            const draggedIndex = parseInt(e.dataTransfer.getData('text/plain'));
+            if (draggedIndex !== index) {
+                                // Меняем местами элементы в массиве
+                [window.photos[draggedIndex], window.photos[index]] = [window.photos[index], window.photos[draggedIndex]];
+                // Меняем местами комментарии
+                [window.photoComments[draggedIndex], window.photoComments[index]] = [window.photoComments[index], window.photoComments[draggedIndex]];
+
+
+                console.log(`🔁 Drop: элементы ${draggedIndex} и ${index} поменялись местами`);
+                console.log('✓ Массивы photos и photoComments обновлены');
+
+                // Обновляем предпросмотр
+                updatePreview();
+            }
+        });
         console.groupEnd();
-    });
+    }
+
+    // Функция для добавления фотографий (может вызываться извне)
+    window.addPhotos = function(files) {
+        console.group('📤 addPhotos: Добавление фотографий извне');
+
+        if (!files || files.length === 0) {
+            console.warn('⚠️ Нет файлов для добавления');
+            console.groupEnd();
+            return;
+        }
+
+        const newFiles = Array.from(files);
+        window.photos = [...window.photos, ...newFiles];
+        console.log('✓ Файлы добавлены к существующим:', window.photos.length, 'всего фото');
+
+        updatePreview();
+        console.groupEnd();
+    };
 
     console.log('🎉 Модуль предпросмотра успешно инициализирован');
     console.groupEnd();
