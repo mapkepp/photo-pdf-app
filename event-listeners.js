@@ -1,4 +1,4 @@
-import { generatePdf } from './pdf-generator.js';
+import { generatePdf } from './pdfmake-generator.js';
 import { setupPhotoPreview } from './photo-preview.js';
 
 document.addEventListener('DOMContentLoaded', () => {
