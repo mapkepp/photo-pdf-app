@@ -1,6 +1,41 @@
+// Вспомогательная функция для форматирования размера файла (экспортируем отдельно)
+function formatFileSize(bytes) {
+    console.group('📏 formatFileSize: Форматирование размера файла');
+    console.log('  - Входные байты:', bytes);
+
+    if (bytes === 0) {
+        console.log('  - Результат: 0 Bytes');
+        console.groupEnd();
+        return '0 Bytes';
+    }
+
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+
+    // Дополнительная проверка на корректность индекса
+    if (i >= sizes.length) {
+        console.warn('⚠️ Размер файла превышает поддерживаемый диапазон (GB)');
+        const maxIndex = sizes.length - 1;
+        const formattedSize = parseFloat((bytes / Math.pow(k, maxIndex)).toFixed(2)) + ' ' + sizes[maxIndex];
+        console.log('  - Отформатированный размер (ограниченный):', formattedSize);
+        console.groupEnd();
+        return formattedSize;
+    }
+
+    const formattedSize = parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+
+    console.log('  - Рассчитанный индекс размера:', i);
+    console.log('  - Единица измерения:', sizes[i]);
+    console.log('  - Отформатированный размер:', formattedSize);
+    console.groupEnd();
+    return formattedSize;
+}
+
+export { formatFileSize };
+
 export function setupPhotoPreview() {
     console.group('🖼️ setupPhotoPreview: Инициализация модуля предпросмотра');
-
 
     const uploadInput = document.getElementById('photo-upload');
     const previewContainer = document.getElementById('photo-preview');
@@ -27,6 +62,29 @@ export function setupPhotoPreview() {
     }
 
     console.log('✓ Все элементы DOM найдены и готовы к работе');
+
+    // Функция отображения статуса (импортируем из event-listeners.js или определяем здесь)
+    function showStatus(element, message, type) {
+        if (!element) return;
+
+        element.textContent = message;
+        element.className = 'status-message';
+
+        switch (type) {
+            case 'success':
+                element.classList.remove('status-error');
+                element.classList.add('status-success');
+                break;
+            case 'error':
+                element.classList.remove('status-success');
+                element.classList.add('status-error');
+                break;
+            default:
+                element.style.background = '#fff3cd';
+                element.style.color = '#856404';
+                break;
+        }
+    }
 
     // Обработчик загрузки файлов
     uploadInput.addEventListener('change', function(e) {
@@ -120,7 +178,6 @@ export function setupPhotoPreview() {
                 photoContainer.className = 'photo-preview-item';
                 photoContainer.dataset.index = index;
                 photoContainer.draggable = true; // Включаем перетаскивание
-
                 console.log('  - Создан контейнер для фото:', photoContainer);
 
                 // Обработчики для перетаскивания
@@ -139,7 +196,7 @@ export function setupPhotoPreview() {
                 caption.textContent = `${file.name} (${formatFileSize(file.size)})`;
                 console.log('  - Создана подпись:', caption);
 
-                // Добавляем поле для комментария (многострочное)
+                                // Добавляем поле для комментария (многострочное)
                 const commentField = document.createElement('textarea');
                 commentField.className = 'comment-field';
                 commentField.placeholder = 'Введите комментарий к фотографии...';
@@ -153,8 +210,8 @@ export function setupPhotoPreview() {
 
                 commentField.addEventListener('input', function() {
                     window.photoComments[index] = this.value;
-            console.log(`📝 Комментарий для фото ${index}: "${this.value.substring(0, 50)}${this.value.length > 50 ? '...' : ''}"`);
-        });
+                    console.log(`📝 Комментарий для фото ${index + 1}: "${this.value.substring(0, 50)}${this.value.length > 50 ? '...' : ''}"`);
+                });
                 console.log('  - Создано поле для комментария:', commentField);
 
                 // Собираем всё вместе
@@ -164,11 +221,11 @@ export function setupPhotoPreview() {
                 previewContainer.appendChild(photoContainer);
                 console.log(`✓ Предпросмотр для ${file.name} добавлен в DOM`);
 
-
                 // Дополнительная проверка отображения изображения
                 img.onload = () => {
                     console.log(`🖼️ Изображение ${file.name} успешно загрузилось и отображается`);
         };
+
         img.onerror = (error) => {
             console.error(`❌ Ошибка загрузки изображения ${file.name} в DOM:`, error);
             // Заменяем изображение заглушкой при ошибке
@@ -200,7 +257,7 @@ export function setupPhotoPreview() {
                 console.groupEnd();
             };
 
-                        // Читаем файл как Data URL для отображения
+            // Читаем файл как Data URL для отображения
             console.log(`🔄 Начинаем чтение файла: ${file.name}`);
             reader.readAsDataURL(file);
         });
@@ -248,7 +305,7 @@ export function setupPhotoPreview() {
             draggedIndex = parseInt(this.dataset.index, 10);
             this.classList.add('dragging');
             e.dataTransfer.effectAllowed = 'move';
-            e.dataTransfer.setData('text/html', this.innerHTML);
+            e.dataTransfer.setData('text/plain', this.dataset.index);
             console.log(`✓ Элемент ${draggedIndex} начал перетаскиваться`);
             console.groupEnd();
         });
@@ -281,7 +338,7 @@ export function setupPhotoPreview() {
 
             if (draggedIndex !== targetIndex && draggedIndex >= 0) {
                 console.group('🔁 drop: Перемещение элемента');
-                console.log(`  - Перемещаем элемент ${draggedIndex} на позицию ${targetIndex}`);
+                console.log(`  - Перемещаем элемент ${draggedIndex + 1} на позицию ${targetIndex + 1}`);
 
                 // Меняем местами элементы в массиве фотографий
                 [window.photos[draggedIndex], window.photos[targetIndex]] =
@@ -290,6 +347,7 @@ export function setupPhotoPreview() {
                 // Меняем местами комментарии вместе с фотографиями
                 [window.photoComments[draggedIndex], window.photoComments[targetIndex]] =
             [window.photoComments[targetIndex], window.photoComments[draggedIndex]];
+
 
                 console.log('✓ Массивы photos и photoComments обновлены');
 
@@ -317,44 +375,10 @@ export function setupPhotoPreview() {
             if (commentField) {
                 commentField.dataset.photoIndex = index;
             }
-            console.log(`  - Элемент ${index} получил индекс ${index}`);
+            console.log(`  - Элемент ${index + 1} получил индекс ${index}`);
         });
         console.log('✓ Все индексы обновлены');
         console.groupEnd();
-    }
-
-    // Вспомогательная функция для форматирования размера файла
-    function formatFileSize(bytes) {
-        console.group('📏 formatFileSize: Форматирование размера файла');
-        console.log('  - Входные байты:', bytes);
-
-        if (bytes === 0) {
-            console.log('  - Результат: 0 Bytes');
-            console.groupEnd();
-            return '0 Bytes';
-        }
-
-        const k = 1024;
-        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-        const i = Math.floor(Math.log(bytes) / Math.log(k));
-
-        // Дополнительная проверка на корректность индекса
-        if (i >= sizes.length) {
-            console.warn('⚠️ Размер файла превышает поддерживаемый диапазон (GB)');
-            const maxIndex = sizes.length - 1;
-            const formattedSize = parseFloat((bytes / Math.pow(k, maxIndex)).toFixed(2)) + ' ' + sizes[maxIndex];
-            console.log('  - Отформатированный размер (ограниченный):', formattedSize);
-            console.groupEnd();
-            return formattedSize;
-        }
-
-        const formattedSize = parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-
-        console.log('  - Рассчитанный индекс размера:', i);
-        console.log('  - Единица измерения:', sizes[i]);
-        console.log('  - Отформатированный размер:', formattedSize);
-        console.groupEnd();
-        return formattedSize;
     }
 
     console.log('🎉 Модуль предпросмотра успешно инициализирован');
@@ -362,6 +386,3 @@ export function setupPhotoPreview() {
 
     return true;
 }
-
-// Экспортируем вспомогательные функции, если они нужны в других модулях
-export { formatFileSize };
