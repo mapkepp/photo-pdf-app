@@ -1,15 +1,16 @@
 export function setupPhotoPreview() {
     console.group('🖼️ setupPhotoPreview: Инициализация модуля предпросмотра');
 
-
     const uploadInput = document.getElementById('photo-upload');
     const previewContainer = document.getElementById('photo-preview');
     const statusElement = document.getElementById('pdf-status');
+    const titleInput = document.getElementById('document-title');
 
     console.log('🔎 Проверка элементов DOM:');
     console.log('  - Поле загрузки (#photo-upload):', uploadInput);
-    console.log('  -Контейнер предпросмотра (#photo-preview):', previewContainer);
-    console.log('  -Элемент статуса (#pdf-status):', statusElement);
+    console.log('  - Контейнер предпросмотра (#photo-preview):', previewContainer);
+    console.log('  - Элемент статуса (#pdf-status):', statusElement);
+    console.log('  - Поле заголовка (#document-title):', titleInput);
 
     if (!uploadInput) {
         console.error('❌ Элемент #photo-upload не найден в DOM');
@@ -35,7 +36,6 @@ export function setupPhotoPreview() {
         previewContainer.innerHTML = '';
         console.log('✓ Контейнер предпросмотра очищен');
 
-        // Безопасный вызов clearStatus — передаём statusElement
         if (statusElement) {
             clearStatus(statusElement);
             console.log('✓ Статус очищен');
@@ -56,6 +56,7 @@ export function setupPhotoPreview() {
 
         // Сохраняем файлы глобально для использования в генерации PDF
         window.photos = Array.from(files);
+        window.photoComments = {}; // Инициализируем хранилище комментариев
         console.log('✓ Файлы сохранены в window.photos:', window.photos);
 
         // Обрабатываем каждый файл для создания превью
@@ -69,7 +70,7 @@ export function setupPhotoPreview() {
                 console.warn(`⚠️ Файл ${file.name} не является изображением, пропускаем`);
                 if (statusElement) {
                     showStatus(statusElement, `Файл ${file.name} не является изображением`, 'error');
-                }
+        }
                 console.groupEnd();
                 return;
             }
@@ -98,9 +99,23 @@ export function setupPhotoPreview() {
                 caption.textContent = `${file.name} (${formatFileSize(file.size)})`;
                 console.log('  -Создана подпись:', caption);
 
+                // Добавляем поле для комментария
+                const commentField = document.createElement('textarea');
+                commentField.className = 'comment-field';
+                commentField.placeholder = 'Введите комментарий к фотографии...';
+                commentField.rows = 3;
+                commentField.dataset.photoIndex = index;
+                commentField.addEventListener('input', function() {
+                    window.photoComments[index] = this.value;
+            console.log(`📝 Комментарий для фото ${index}: "${this.value}"`);
+        });
+                console.log('  -Создано поле для комментария:', commentField);
+
+
                 // Собираем всё вместе
                 photoContainer.appendChild(img);
                 photoContainer.appendChild(caption);
+                photoContainer.appendChild(commentField);
                 previewContainer.appendChild(photoContainer);
                 console.log(`✓ Предпросмотр для ${file.name} добавлен в DOM`);
 
@@ -117,7 +132,7 @@ export function setupPhotoPreview() {
                 console.groupEnd();
             };
 
-            reader.onerror = function() {
+                        reader.onerror = function() {
                 console.error(`❌ Ошибка при чтении файла: ${file.name}`);
                 // Создаём заглушку для проблемных файлов
                 const errorContainer = document.createElement('div');
@@ -129,7 +144,7 @@ export function setupPhotoPreview() {
                 previewContainer.appendChild(errorContainer);
                 if (statusElement) {
                     showStatus(statusElement, `Ошибка при загрузке файла: ${file.name}`, 'error');
-        }
+                }
                 console.groupEnd();
             };
 
@@ -155,7 +170,6 @@ export function setupPhotoPreview() {
         }
         console.groupEnd();
     });
-
 
     // Добавляем обработчик для очистки предпросмотра при повторном выборе файлов
     uploadInput.addEventListener('click', function() {
