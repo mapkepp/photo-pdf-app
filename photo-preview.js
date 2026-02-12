@@ -1,6 +1,7 @@
 export function setupPhotoPreview() {
     console.group('🖼️ setupPhotoPreview: Инициализация модуля предпросмотра');
 
+
     const uploadInput = document.getElementById('photo-upload');
     const previewContainer = document.getElementById('photo-preview');
     const statusElement = document.getElementById('pdf-status');
@@ -102,6 +103,17 @@ export function setupPhotoPreview() {
                 photoContainer.appendChild(caption);
                 previewContainer.appendChild(photoContainer);
                 console.log(`✓ Предпросмотр для ${file.name} добавлен в DOM`);
+
+                // Дополнительная проверка отображения изображения
+                img.onload = () => {
+                    console.log(`🖼️ Изображение ${file.name} успешно загрузилось и отображается`);
+        };
+        img.onerror = () => {
+            console.error(`❌ Ошибка загрузки изображения ${file.name} в DOM`);
+            if (statusElement) {
+                showStatus(statusElement, `Ошибка отображения изображения: ${file.name}`, 'error');
+            }
+        };
                 console.groupEnd();
             };
 
@@ -117,7 +129,7 @@ export function setupPhotoPreview() {
                 previewContainer.appendChild(errorContainer);
                 if (statusElement) {
                     showStatus(statusElement, `Ошибка при загрузке файла: ${file.name}`, 'error');
-                }
+        }
                 console.groupEnd();
             };
 
@@ -144,6 +156,7 @@ export function setupPhotoPreview() {
         console.groupEnd();
     });
 
+
     // Добавляем обработчик для очистки предпросмотра при повторном выборе файлов
     uploadInput.addEventListener('click', function() {
         console.group('🗑️ Обработчик click: Очистка предпросмотра');
@@ -163,6 +176,8 @@ export function setupPhotoPreview() {
         if (statusElement) {
             clearStatus(statusElement);
             console.log('✓ Статус очищен при клике');
+        } else {
+            console.warn('⚠️ Элемент #pdf-status не найден — статус не будет очищен');
         }
         console.groupEnd();
     });
@@ -175,13 +190,36 @@ export function setupPhotoPreview() {
 
 // Вспомогательная функция для форматирования размера файла
 function formatFileSize(bytes) {
-    if (bytes === 0) return '0 Bytes';
+    console.group('📏 formatFileSize: Форматирование размера файла');
+    console.log('  - Входные байты:', bytes);
+
+    if (bytes === 0) {
+        console.log('  - Результат: 0 Bytes');
+        console.groupEnd();
+        return '0 Bytes';
+    }
 
     const k = 1024;
     const sizes = ['Bytes', 'KB', 'MB', 'GB'];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
 
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    // Дополнительная проверка на корректность индекса
+    if (i >= sizes.length) {
+        console.warn('⚠️ Размер файла превышает поддерживаемый диапазон (GB)');
+        const maxIndex = sizes.length - 1;
+        const formattedSize = parseFloat((bytes / Math.pow(k, maxIndex)).toFixed(2)) + ' ' + sizes[maxIndex];
+        console.log('  - Отформатированный размер (ограниченный):', formattedSize);
+        console.groupEnd();
+        return formattedSize;
+    }
+
+    const formattedSize = parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+
+    console.log('  - Рассчитанный индекс размера:', i);
+    console.log('  - Единица измерения:', sizes[i]);
+    console.log('  - Отформатированный размер:', formattedSize);
+    console.groupEnd();
+    return formattedSize;
 }
 
 // Функция для отображения статуса — принимает statusElement как параметр
