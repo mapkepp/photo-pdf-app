@@ -1,6 +1,59 @@
 import { setupPhotoPreview } from './photo-preview.js';
 import { ImageOptimizer } from './image-optimizer.js';
 
+function showStatus(statusElement, message, type) {
+    console.group('📝 showStatus: Обновление статуса');
+    console.log('  - Сообщение: ' + message);
+    console.log('  - Тип: ' + type);
+
+    if (!statusElement) {
+        console.warn('⚠️ Элемент статуса (#pdf-status) не найден');
+        console.groupEnd();
+        return;
+    }
+
+    statusElement.textContent = message;
+    statusElement.className = 'status-message';
+
+    switch (type) {
+        case 'success':
+            statusElement.classList.remove('status-error');
+            statusElement.classList.add('status-success');
+            console.log('✓ Установлен класс статуса: status-success');
+            break;
+        case 'error':
+            statusElement.classList.remove('status-success');
+            statusElement.classList.add('status-error');
+            console.log('✓ Установлен класс статуса: status-error');
+            break;
+        default:
+            statusElement.classList.remove('status-success', 'status-error');
+            statusElement.style.background = '#fff3cd';
+            statusElement.style.color = '#856404';
+            console.log('✓ Установлены стили для информационного статуса');
+            break;
+    }
+    console.log('✓ Статус успешно обновлён');
+    console.groupEnd();
+}
+
+function clearStatus(statusElement) {
+    console.group('🗑️ clearStatus: Очистка статуса');
+
+    if (!statusElement) {
+        console.warn('⚠️ Элемент статуса (#pdf-status) не найден — пропуск очистки');
+        console.groupEnd();
+        return;
+    }
+
+    statusElement.textContent = '';
+    statusElement.className = 'status-message';
+    statusElement.style.removeProperty('background');
+    statusElement.style.removeProperty('color');
+    console.log('✓ Статус успешно очищен');
+    console.groupEnd();
+}
+
 export function setupEventListeners() {
     console.group('🎯 setupEventListeners: Инициализация обработчиков событий');
 
@@ -64,5 +117,5 @@ console.log('🎉 Все обработчики событий успешно и
 console.groupEnd();
 }
 
-// Экспортируем вспомогательные функции
-export { showStatus, clearStatus, generatePDF };
+// Экспортируем только необходимые функции
+export { showStatus, clearStatus };
