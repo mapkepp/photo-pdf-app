@@ -14,6 +14,9 @@
         <div class="title-section">
             <label for="document-title">Заголовок документа:</label>
             <input type="text" id="document-title" placeholder="Введите заголовок для PDF" value="Мои фотографии">
+
+            <label for="subtitle" style="margin-top: 15px; display: block;">Текст под заголовком:</label>
+            <textarea id="subtitle" class="comment-field" rows="3" placeholder="Дополнительный текст под заголовком документа"></textarea>
         </div>
 
         <div class="upload-section">
@@ -21,12 +24,13 @@
                 🖼️ Выберите фотографии
             </label>
             <input type="file" id="photo-upload" accept="image/jpeg,image/png,image/webp" multiple>
+            <button id="clear-preview" class="clear-button">Очистить предпросмотр</button>
         </div>
 
         <div id="pdf-status" class="status-message">Ожидание загрузки библиотек...</div>
 
         <div class="preview-section">
-            <h2>Предпросмотр фотографий</h2>
+            <h2>Предпросмотр фотографий (перетаскивайте для изменения порядка)</h2>
             <div id="photo-preview" class="preview-container"></div>
         </div>
 
