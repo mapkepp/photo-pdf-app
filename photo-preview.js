@@ -11,12 +11,18 @@ export function setupPhotoPreview() {
     uploadInput.addEventListener('change', function(event) {
         const files = event.target.files;
 
-        // Очищаем контейнер предпросмотра и статус
+        // Очищаем контейнер предпросмотра
         previewContainer.innerHTML = '';
-        clearStatus();
+
+        // Безопасный вызов clearStatus — только если элемент статуса существует
+        if (statusElement) {
+            clearStatus();
+        }
 
         if (files.length === 0) {
-            showStatus('Нет выбранных файлов для предпросмотра', 'info');
+            if (statusElement) {
+                showStatus('Нет выбранных файлов для предпросмотра', 'info');
+            }
             console.log('🔎 Нет выбранных файлов для предпросмотра');
             return;
         }
@@ -30,7 +36,9 @@ export function setupPhotoPreview() {
         Array.from(files).forEach((file, index) => {
             if (!file.type.match('image.*')) {
                 console.warn(`⚠️ Файл ${file.name} не является изображением, пропускаем`);
-                showStatus(`Файл ${file.name} не является изображением`, 'error');
+                if (statusElement) {
+                    showStatus(`Файл ${file.name} не является изображением`, 'error');
+                }
                 return;
             }
 
@@ -70,7 +78,9 @@ export function setupPhotoPreview() {
             <div class="preview-caption">Ошибка загрузки: ${file.name}</div>
                 `;
                 previewContainer.appendChild(errorContainer);
-                showStatus(`Ошибка при загрузке файла: ${file.name}`, 'error');
+                if (statusElement) {
+                    showStatus(`Ошибка при загрузке файла: ${file.name}`, 'error');
+                }
             };
 
             // Читаем файл как Data URL для отображения
@@ -85,8 +95,10 @@ export function setupPhotoPreview() {
             console.log('✓ Кнопка "Создать PDF" активирована');
         }
 
-        // Обновляем статус
-        showStatus(`Загружено ${files.length} фото(ов). Готов к созданию PDF.`, 'success');
+        // Обновляем статус, если элемент существует
+        if (statusElement) {
+            showStatus(`Загружено ${files.length} фото(ов). Готов к созданию PDF.`, 'success');
+        }
     });
 
     // Добавляем обработчик для очистки предпросмотра при повторном выборе файлов
@@ -98,6 +110,11 @@ export function setupPhotoPreview() {
         if (generateButton) {
             generateButton.disabled = true;
             generateButton.classList.add('disabled');
+        }
+
+        // Безопасный вызов clearStatus при клике
+        if (statusElement) {
+            clearStatus();
         }
     });
 }
