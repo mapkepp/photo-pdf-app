@@ -14,7 +14,44 @@ export class ImageOptimizer {
     }
 
     /**
-     * Оптимизация изображения
+     * Пакетная оптимизация изображений
+     * @param {File[]} files — массив файлов изображений
+     * @returns {Promise<string[]>} — массив Data URL оптимизированных изображений
+     */
+    async optimizeImagesBatch(files) {
+        console.group('🔄 optimizeImagesBatch: Пакетная оптимизация изображений');
+        console.log('  - Количество файлов для оптимизации:', files.length);
+
+        const optimizedImages = [];
+
+        for (let i = 0; i < files.length; i++) {
+            console.group(`🖼️ Оптимизация изображения ${i + 1}: ${files[i].name}`);
+            try {
+                const optimizedImage = await this.optimizeImage(files[i]);
+                optimizedImages.push(optimizedImage);
+                console.log('✓ Изображение оптимизировано успешно');
+            } catch (error) {
+                console.error(`❌ Ошибка при оптимизации ${files[i].name}:`, error);
+                // В случае ошибки добавляем оригинальное изображение
+                const reader = new FileReader();
+                await new Promise((resolve, reject) => {
+                    reader.onload = resolve;
+            reader.onerror = reject;
+            reader.readAsDataURL(files[i]);
+        });
+        optimizedImages.push(reader.result);
+        console.log('⚠️ Использовано оригинальное изображение из‑за ошибки оптимизации');
+    }
+            console.groupEnd();
+        }
+
+        console.log('✅ Все изображения оптимизированы:', optimizedImages.length);
+        console.groupEnd();
+        return optimizedImages;
+    }
+
+    /**
+     * Оптимизация одного изображения
      * @param {File} file — исходный файл изображения
      * @returns {Promise<string>} — Data URL оптимизированного изображения
      */
@@ -31,19 +68,17 @@ export class ImageOptimizer {
                 const img = new Image();
 
                 img.onload = () => {
-                    console.log('  - Изображение загружено, размеры:', img.width, 'x', img.height, 'px');
+                    console.log('  - Изображение загружено, размеры:', img.width, 'x', img.height);
 
-            // Определяем новые размеры
-            let newWidth, newHeight;
+                        // Определяем новые размеры
+            let newWidth = img.width;
+            let newHeight = img.height;
+
             if (img.width > this.maxWidth) {
                 newWidth = this.maxWidth;
                 newHeight = (img.height * this.maxWidth) / img.width;
-            } else {
-                newWidth = img.width;
-                newHeight = img.height;
+                console.log('  - Размеры изменены:', newWidth, 'x', newHeight);
             }
-
-            console.log('  - Новые размеры:', newWidth, 'x', newHeight, 'px');
 
             // Создаём canvas для ресайза
             const canvas = document.createElement('canvas');
@@ -51,91 +86,110 @@ export class ImageOptimizer {
             canvas.height = newHeight;
             const ctx = canvas.getContext('2d');
 
+            console.log('  - Canvas создан:', newWidth, 'x', newHeight);
+
             // Устанавливаем высокое качество рендеринга
             ctx.imageSmoothingQuality = 'high';
             ctx.imageSmoothingEnabled = true;
-
-            console.log('  - Canvas создан:', canvas.width, 'x', canvas.height);
 
             // Рисуем изображение на canvas с новыми размерами
             ctx.drawImage(img, 0, 0, newWidth, newHeight);
             console.log('  - Изображение нарисовано на canvas');
 
-            // Конвертируем в Data URL с заданным качеством
+            // Конвертируем в Data URL с оптимизацией качества
             const mimeType = file.type || 'image/jpeg';
             const dataUrl = canvas.toDataURL(mimeType, this.quality);
+            console.log('  - Data URL создан, MIME-тип:', mimeType, 'качество:', this.quality);
 
-            console.log('  - Data URL создан (длина:', dataUrl.length, 'символов)');
+            // Проверяем размер оптимизированного изображения
+            const blob = dataURLToBlob(dataUrl);
+            console.log('  - Оптимизированный размер:', formatFileSize(blob.size));
+            console.log('  - Исходный размер:', formatFileSize(file.size));
 
-            // Получаем размер оптимизированного изображения
-            const optimizedSize = dataUrl.length;
-            console.log('  - Размер оптимизированного изображения:', formatFileSize(optimizedSize));
-            console.log('  - Коэффициент сжатия:', (file.size / optimizedSize).toFixed(2), 'x');
+            const compressionRatio = ((file.size - blob.size) / file.size) * 100;
+            console.log(`  - Степень сжатия: ${compressionRatio.toFixed(1)}%`);
 
             resolve(dataUrl);
         };
 
         img.onerror = (error) => {
-            console.error('❌ Ошибка загрузки изображения для оптимизации:', file.name, error);
-            reject(new Error('Ошибка загрузки изображения'));
+            console.error('❌ Ошибка загрузки изображения для оптимизации:', error);
+            reject(error);
         };
 
         img.src = e.target.result;
     };
 
     reader.onerror = (error) => {
-        console.error('❌ Ошибка чтения файла:', file.name, error);
-        reject(new Error('Ошибка чтения файла'));
+        console.error('❌ Ошибка чтения файла:', error);
+        reject(error);
     };
 
-    // Читаем файл как Data URL
-    console.log('🔄 Начинаем чтение файла для оптимизации:', file.name);
+    console.log('🔄 Начинаем чтение файла:', file.name);
     reader.readAsDataURL(file);
 });
-
-console.groupEnd();
 }
 
 /**
- * Пакетная оптимизация изображений
- * @param {File[]} files — массив файлов изображений
- * @returns {Promise<string[]>} — массив Data URL оптимизированных изображений
+ * Конвертирует Data URL в Blob
+ * @param {string} dataUrl — Data URL изображения
+ * @returns {Blob} — Blob объекта изображения
  */
-async optimizeImagesBatch(files) {
-    console.group('📦 optimizeImagesBatch: Пакетная оптимизация', files.length, 'изображений');
+function dataURLToBlob(dataUrl) {
+    console.group('💾 dataURLToBlob: Конвертация Data URL в Blob');
+    console.log('  - Длина Data URL:', dataUrl.length);
 
-    const results = [];
-    for (let i = 0; i < files.length; i++) {
-        try {
-            console.log(`🔄 Оптимизация изображения ${i + 1}/${files.length}:`, files[i].name);
-            const optimizedImage = await this.optimizeImage(files[i]);
-            results.push(optimizedImage);
-            console.log(`✅ Изображение ${i + 1} оптимизировано успешно`);
-        } catch (error) {
-            console.error(`❌ Ошибка оптимизации изображения ${i + 1}:`, files[i].name, error);
-            // Пропускаем проблемные файлы, но продолжаем обработку остальных
-            results.push(null);
-        }
+    // Извлекаем тип MIME и данные
+    const parts = dataUrl.split(',');
+    const contentType = parts[0].match(/:(.*?);/)[1];
+    const byteString = atob(parts[1]);
+
+    // Создаём массив байтов
+    const arrayBuffer = new ArrayBuffer(byteString.length);
+    const uint8Array = new Uint8Array(arrayBuffer);
+
+    for (let i = 0; i < byteString.length; i++) {
+        uint8Array[i] = byteString.charCodeAt(i);
     }
 
-    console.log('✓ Все изображения обработаны (успешно или с ошибками)');
+    const blob = new Blob([arrayBuffer], { type: contentType });
+    console.log('✓ Blob создан, тип:', contentType, 'размер:', formatFileSize(blob.size));
     console.groupEnd();
-    return results;
+    return blob;
 }
+
+/**
+ * Получает информацию об изображении
+ * @param {File} file — файл изображения
+ * @returns {Promise<{width: number, height: number, size: number}>} — информация об изображении
+ */
+async getImageInfo(file) {
+    console.group('📊 getImageInfo: Получение информации об изображении', file.name);
+
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+
+        reader.onload = (e) => {
+            const img = new Image();
+
+            img.onload = () => {
+                const info = {
+                    width: img.width,
+            height: img.height,
+            size: file.size,
+            type: file.type
+        };
+        console.log('✓ Информация получена:', info);
+        console.groupEnd();
+        resolve(info);
+    };
+
+    img.onerror = reject;
+    img.src = e.target.result;
+};
+
+reader.onerror = reject;
+reader.readAsDataURL(file);
+});
 }
-
-// Вспомогательная функция для форматирования размера файла
-function formatFileSize(bytes) {
-    if (bytes === 0) return '0 Bytes';
-
-    const k = 1024;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-
-    if (i >= sizes.length) {
-        const maxIndex = sizes.length - 1;
-        return parseFloat((bytes / Math.pow(k, maxIndex)).toFixed(2)) + ' ' + sizes[maxIndex];
-    }
-
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
 }
